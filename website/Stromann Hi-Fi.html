@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>Stromann VN — Hi-Fi Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css?v=3" />
+<link rel="stylesheet" href="app.css?v=3" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="layout.jsx"></script>
+<script type="text/babel" src="page-home.jsx"></script>
+<script type="text/babel" src="page-products.jsx"></script>
+<script type="text/babel" src="page-product-detail.jsx"></script>
+<script type="text/babel" src="page-others.jsx"></script>
+<script type="text/babel" src="page-recruitment.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { Header, Footer, FloatingSidebar } = window.SLAYOUT;
+
+function parseHash() {
+  const h = (location.hash || "#/").replace(/^#/, "");
+  const [path, query] = h.split("?");
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length === 0) return { page: "home" };
+  if (parts[0] === "products" && parts[1]) return { page: "product-detail", id: parts[1] };
+  if (parts[0] === "products") return { page: "products" };
+  if (parts[0] === "industries") return { page: "industries" };
+  if (parts[0] === "about") return { page: "about" };
+  if (parts[0] === "news") return { page: "news" };
+  if (parts[0] === "recruitment") return { page: "recruitment" };
+  if (parts[0] === "contact" || parts[0] === "quote") return { page: "contact" };
+  return { page: "home" };
+}
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#E11D2C",
+  "heroVariant": "split",
+  "showFloatingSidebar": true,
+  "containerWidth": 1280,
+  "fontScale": 1
+}/*EDITMODE-END*/;
+
+function App() {
+  const [route, setRoute] = React.useState(parseHash());
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    const handler = () => { setRoute(parseHash()); window.scrollTo(0, 0); };
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
+  }, []);
+
+  // apply tweaks
+  React.useEffect(() => {
+    const r = document.documentElement;
+    r.style.setProperty("--accent", tweaks.accent);
+    r.style.setProperty("--brand-600", tweaks.accent);
+    r.style.setProperty("--container", tweaks.containerWidth + "px");
+    document.body.style.fontSize = (14 * tweaks.fontScale) + "px";
+  }, [tweaks]);
+
+  const navigate = (page) => location.hash = "#/" + (page === "home" ? "" : page);
+
+  const Page = (() => {
+    switch (route.page) {
+      case "home": return <window.PageHome heroVariant={tweaks.heroVariant} />;
+      case "products": return <window.PageProducts />;
+      case "product-detail": return <window.PageProductDetail id={route.id} />;
+      case "industries": return <window.PageIndustries />;
+      case "about": return <window.PageAbout />;
+      case "news": return <window.PageNews />;
+      case "recruitment": return <window.PageRecruitment />;
+      case "contact": return <window.PageContact />;
+      default: return <window.PageHome />;
+    }
+  })();
+
+  return (
+    <div className="page-wrap">
+      <Header route={route} navigate={navigate} />
+      <main>{Page}</main>
+      <Footer />
+      {tweaks.showFloatingSidebar && <FloatingSidebar />}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Brand" />
+        <TweakColor label="Accent (đỏ)" value={tweaks.accent} onChange={v => setTweak('accent', v)} />
+        <TweakSection label="Layout" />
+        <TweakRadio label="Hero" value={tweaks.heroVariant}
+          options={[{value:"split", label:"Split"}, {value:"centered", label:"Centered"}]}
+          onChange={v => setTweak('heroVariant', v)} />
+        <TweakToggle label="Floating sidebar liên hệ" value={tweaks.showFloatingSidebar}
+          onChange={v => setTweak('showFloatingSidebar', v)} />
+        <TweakSlider label="Container width" value={tweaks.containerWidth} min={1120} max={1440} step={20} unit="px"
+          onChange={v => setTweak('containerWidth', v)} />
+        <TweakSlider label="Font scale" value={tweaks.fontScale} min={0.9} max={1.15} step={0.05}
+          onChange={v => setTweak('fontScale', v)} />
+
+        <TweakSection label="Điều hướng nhanh" />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          <TweakButton onClick={() => location.hash = "#/"}>Home</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/products"}>Products</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/products/agitan-120"}>Detail</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/industries"}>Industries</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/about"}>About</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/news"}>News</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/recruitment"}>Recruitment</TweakButton>
+          <TweakButton onClick={() => location.hash = "#/contact"}>Contact</TweakButton>
+        </div>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

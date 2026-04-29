@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>Stromann Admin — CMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--n-900); background: #F5F6F8; -webkit-font-smoothing: antialiased; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+a { color: inherit; text-decoration: none; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
+
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; width: 1440px; max-width: 100%; margin: 0 auto; }
+
+/* Sidebar */
+.sb { background: #0F0F12; color: #fff; padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sb__brand { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid #27272A; margin-bottom: 16px; }
+.sb__mark { width: 32px; height: 32px; border-radius: 6px; background: var(--brand-500); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }
+.sb__name { font-weight: 700; font-size: 14px; }
+.sb__tag { font-size: 10px; color: #71717A; letter-spacing: 0.1em; text-transform: uppercase; }
+.sb__group { padding: 12px 20px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #52525B; text-transform: uppercase; }
+.sb__item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; color: #D1D1D6; font-size: 13px; font-weight: 500; cursor: pointer; border-left: 2px solid transparent; transition: all .15s; }
+.sb__item:hover { background: #1A1A1F; color: #fff; }
+.sb__item.active { background: linear-gradient(90deg, rgba(225,29,44,0.18), transparent); border-left-color: var(--brand-500); color: #fff; font-weight: 600; }
+.sb__icon { width: 16px; height: 16px; opacity: 0.85; }
+.sb__count { margin-left: auto; background: #27272A; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.sb__count--hot { background: var(--brand-500); }
+
+/* Main */
+.main { display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: #fff; border-bottom: 1px solid var(--n-200); padding: 14px 28px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10; }
+.searchbar { flex: 1; max-width: 480px; display: flex; align-items: center; gap: 8px; background: #F4F4F5; border-radius: 8px; padding: 8px 12px; }
+.searchbar input { flex: 1; background: none; border: none; outline: none; font-size: 13px; }
+.tb__right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.tb__btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--n-600); position: relative; transition: background .15s; }
+.tb__btn:hover { background: var(--n-100); }
+.tb__btn .dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-500); border: 2px solid #fff; }
+.tb__user { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 8px; cursor: pointer; }
+.tb__user:hover { background: var(--n-100); }
+.tb__avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #E11D2C, #931017); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.tb__role { font-size: 11px; color: var(--n-500); }
+
+.content { padding: 24px 28px 64px; }
+.page-h { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-h h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.page-h p { margin: 4px 0 0; color: var(--n-500); font-size: 13px; }
+.crumb { font-size: 12px; color: var(--n-500); margin-bottom: 4px; }
+.crumb span { color: var(--n-900); font-weight: 600; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat { background: #fff; border: 1px solid var(--n-200); border-radius: 12px; padding: 18px 20px; }
+.stat__lbl { font-size: 11px; font-weight: 700; color: var(--n-500); letter-spacing: 0.06em; text-transform: uppercase; }
+.stat__num { font-size: 28px; font-weight: 700; margin: 6px 0 4px; letter-spacing: -0.01em; }
+.stat__delta { font-size: 12px; font-weight: 600; }
+.stat__delta.up { color: #16A34A; }
+.stat__delta.down { color: #DC2626; }
+.stat--accent { background: linear-gradient(135deg, #E11D2C, #931017); color: #fff; border: none; }
+.stat--accent .stat__lbl { color: rgba(255,255,255,0.85); }
+.stat--accent .stat__delta { color: rgba(255,255,255,0.9); }
+
+/* Cards */
+.card { background: #fff; border: 1px solid var(--n-200); border-radius: 12px; }
+.card__head { padding: 16px 20px; border-bottom: 1px solid var(--n-200); display: flex; align-items: center; justify-content: space-between; }
+.card__head h3 { margin: 0; font-size: 15px; font-weight: 700; }
+.card__body { padding: 16px 20px; }
+.row-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; transition: all .15s; }
+.btn--primary { background: var(--brand-500); color: #fff; }
+.btn--primary:hover { background: var(--brand-600); }
+.btn--ghost { color: var(--n-700); }
+.btn--ghost:hover { background: var(--n-100); }
+.btn--secondary { background: #fff; border: 1px solid var(--n-300); color: var(--n-800); }
+.btn--secondary:hover { border-color: var(--n-500); }
+.btn--danger { color: #DC2626; }
+.btn--danger:hover { background: #FEE2E2; }
+.btn--sm { padding: 6px 10px; font-size: 12px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--n-200); margin-bottom: 20px; }
+.tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--n-600); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.active { color: var(--brand-500); border-bottom-color: var(--brand-500); }
+.tab:hover:not(.active) { color: var(--n-900); }
+
+/* Tables */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; font-size: 11px; font-weight: 700; color: var(--n-500); letter-spacing: 0.06em; text-transform: uppercase; padding: 12px 16px; background: #FAFAFA; border-bottom: 1px solid var(--n-200); }
+.tbl td { padding: 14px 16px; border-bottom: 1px solid var(--n-100); font-size: 13px; vertical-align: middle; }
+.tbl tr:hover td { background: #FAFAFA; }
+.tbl__id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--n-500); }
+.tbl__name { font-weight: 600; color: var(--n-900); }
+.tbl__sub { font-size: 12px; color: var(--n-500); margin-top: 2px; }
+.tbl__actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+.tbl tr:hover .tbl__actions { opacity: 1; }
+.tbl__act { width: 28px; height: 28px; border-radius: 6px; color: var(--n-500); display: inline-flex; align-items: center; justify-content: center; }
+.tbl__act:hover { background: var(--n-100); color: var(--n-900); }
+.tbl__act.danger:hover { background: #FEE2E2; color: #DC2626; }
+
+/* Pills/badges */
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.pill--success { background: #DCFCE7; color: #166534; }
+.pill--warn { background: #FEF3C7; color: #92400E; }
+.pill--info { background: #DBEAFE; color: #1E40AF; }
+.pill--neutral { background: var(--n-100); color: var(--n-700); }
+.pill--brand { background: #FFE4E6; color: var(--brand-700); }
+.pill--danger { background: #FEE2E2; color: #991B1B; }
+
+/* Lang chip */
+.lang { display: inline-flex; gap: 2px; padding: 2px; background: var(--n-100); border-radius: 4px; }
+.lang span { padding: 1px 5px; font-size: 9px; font-weight: 700; border-radius: 2px; color: var(--n-500); }
+.lang span.has { background: #fff; color: var(--brand-500); }
+
+/* Form */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--n-700); }
+.field .req { color: var(--brand-500); }
+.input { width: 100%; padding: 9px 12px; border: 1px solid var(--n-300); border-radius: 8px; background: #fff; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+.input:focus { outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(225,29,44,0.1); }
+textarea.input { min-height: 80px; resize: vertical; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* Notifications panel (drawer) */
+.drawer { position: fixed; top: 0; right: 0; width: 380px; height: 100vh; background: #fff; box-shadow: -8px 0 32px rgba(0,0,0,0.12); z-index: 100; transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
+.drawer.open { transform: translateX(0); }
+.drawer__overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.drawer__overlay.open { opacity: 1; pointer-events: auto; }
+.drawer__head { padding: 18px 20px; border-bottom: 1px solid var(--n-200); display: flex; align-items: center; justify-content: space-between; }
+.drawer__head h3 { margin: 0; font-size: 15px; font-weight: 700; }
+.drawer__filter { display: flex; gap: 4px; padding: 12px 20px; border-bottom: 1px solid var(--n-200); }
+.drawer__filter button { padding: 5px 10px; font-size: 11px; font-weight: 600; border-radius: 999px; color: var(--n-600); background: var(--n-100); }
+.drawer__filter button.active { background: var(--n-900); color: #fff; }
+.drawer__list { flex: 1; overflow-y: auto; }
+.notif { padding: 14px 20px; border-bottom: 1px solid var(--n-100); display: flex; gap: 12px; cursor: pointer; transition: background .15s; }
+.notif:hover { background: #FAFAFA; }
+.notif.unread { background: #FFF8F8; }
+.notif.unread::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--brand-500); margin-top: 8px; flex-shrink: 0; }
+.notif:not(.unread)::before { content: ''; width: 6px; height: 6px; flex-shrink: 0; }
+.notif__body { flex: 1; }
+.notif__title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.notif__sub { font-size: 12px; color: var(--n-500); margin-top: 4px; }
+.notif__time { font-size: 11px; color: var(--n-400); margin-top: 6px; }
+.notif__icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.notif__icon.quote { background: #FFE4E6; color: var(--brand-700); }
+.notif__icon.tech { background: #DBEAFE; color: #1E40AF; }
+.notif__icon.cv { background: #DCFCE7; color: #166534; }
+.notif__icon.contact { background: #FEF3C7; color: #92400E; }
+
+/* Activity */
+.activity { display: flex; flex-direction: column; }
+.activity__row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--n-100); }
+.activity__row:last-child { border-bottom: none; }
+.activity__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-500); margin-top: 6px; flex-shrink: 0; }
+.activity__txt { flex: 1; font-size: 13px; line-height: 1.5; }
+.activity__txt b { font-weight: 600; }
+.activity__time { font-size: 11px; color: var(--n-500); margin-top: 2px; }
+
+/* Toolbar */
+.toolbar2 { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.toolbar2 .filt { display: flex; gap: 6px; }
+.toolbar2 .chip { padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--n-300); font-size: 12px; font-weight: 600; color: var(--n-700); }
+.toolbar2 .chip.active { background: var(--n-900); color: #fff; border-color: var(--n-900); }
+.toolbar2 .spacer { flex: 1; }
+
+/* Banner thumb */
+.thumb { width: 64px; height: 40px; border-radius: 6px; background: repeating-linear-gradient(45deg, var(--n-100) 0 8px, #fff 8px 16px); border: 1px solid var(--n-200); }
+.thumb--brand { background: repeating-linear-gradient(45deg, #FFE4E6 0 8px, #fff 8px 16px); }
+
+/* Toggle */
+.toggle { width: 32px; height: 18px; background: var(--n-300); border-radius: 999px; position: relative; cursor: pointer; transition: background .15s; }
+.toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform .15s; }
+.toggle.on { background: var(--brand-500); }
+.toggle.on::after { transform: translateX(14px); }
+
+/* Page (hidden by default) */
+.page { display: none; }
+.page.active { display: block; }
+
+.empty { text-align: center; padding: 40px; color: var(--n-500); font-size: 13px; }
+
+/* Mini chart */
+.chart { height: 180px; display: flex; align-items: flex-end; gap: 6px; padding: 8px 0; }
+.bar { flex: 1; background: linear-gradient(to top, var(--brand-500), #FF8585); border-radius: 4px 4px 0 0; position: relative; transition: opacity .15s; min-height: 4px; }
+.bar:hover { opacity: 0.7; }
+.bar__lbl { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--n-500); white-space: nowrap; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--n-900); color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px; z-index: 200; transform: translateY(20px); opacity: 0; transition: all .25s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useMemo } = React;
+
+// ============================================================================
+// DATA
+// ============================================================================
+
+const NAV = [
+  { group: "Tổng quan" },
+  { id: "dashboard", label: "Dashboard", icon: "📊" },
+  { id: "notifications", label: "Thông báo", icon: "🔔", count: 12, hot: true },
+  { id: "submissions", label: "Form gửi đến", icon: "📥", count: 28, hot: true },
+
+  { group: "Nội dung" },
+  { id: "banners", label: "Banner trang chủ", icon: "🖼" },
+  { id: "products", label: "Sản phẩm", icon: "📦", count: 72 },
+  { id: "industries", label: "Ngành ứng dụng", icon: "🏭", count: 3 },
+  { id: "tech", label: "Vấn đề kỹ thuật", icon: "🛠", count: 4 },
+  { id: "news", label: "Tin tức", icon: "📰", count: 24 },
+  { id: "recruitment", label: "Tuyển dụng", icon: "💼", count: 6 },
+
+  { group: "Hệ thống" },
+  { id: "users", label: "Người dùng & quyền", icon: "👥" },
+  { id: "languages", label: "Đa ngôn ngữ", icon: "🌐" },
+  { id: "seo", label: "SEO", icon: "🔍" },
+  { id: "logs", label: "Log hoạt động", icon: "📜" },
+  { id: "settings", label: "Cấu hình", icon: "⚙" },
+];
+
+const NOTIFICATIONS = [
+  { id: 1, type: "quote", icon: "💰", title: "Yêu cầu báo giá mới — Cty Sơn Nippon VN", sub: "AGITAN® 120 (200kg) + EDAPLAN® 470 (50kg)", time: "2 phút trước", unread: true, target: { page: "submissions", id: "SUB-2026-0429-001" } },
+  { id: 2, type: "tech", icon: "🛠", title: "Tư vấn kỹ thuật — Anh Tuấn (Đại Bàng Paint)", sub: "Vấn đề bọt khí trên mực in flexo gốc nước", time: "12 phút trước", unread: true, target: { page: "submissions", id: "SUB-2026-0429-002" } },
+  { id: 3, type: "cv", icon: "📄", title: "CV ứng tuyển — Lab Engineer", sub: "Nguyễn Thanh Hà — 3 năm KN MÜNZING", time: "28 phút trước", unread: true, target: { page: "recruitment", id: 1 } },
+  { id: 4, type: "contact", icon: "✉", title: "Liên hệ chung — JR Industrial", sub: "Yêu cầu mẫu thử HYDROPALAT® WE 3475", time: "1 giờ trước", unread: true, target: { page: "submissions", id: "SUB-2026-0429-004" } },
+  { id: 5, type: "quote", icon: "💰", title: "Yêu cầu báo giá — Vinaplast", sub: "5 mã wax additive cho masterbatch PE", time: "2 giờ trước", unread: false, target: { page: "submissions", id: "SUB-2026-0429-005" } },
+  { id: 6, type: "tech", icon: "🛠", title: "Tư vấn kỹ thuật — Cty Sơn 4 Oranges", sub: "Tối ưu công thức sơn xây dựng", time: "3 giờ trước", unread: false, target: { page: "submissions", id: "SUB-2026-0428-021" } },
+  { id: 7, type: "cv", icon: "📄", title: "CV ứng tuyển — Tech Sales miền Bắc", sub: "Trần Minh Quân", time: "5 giờ trước", unread: false, target: { page: "recruitment", id: 3 } },
+  { id: 8, type: "quote", icon: "💰", title: "Báo giá đã được Sales tiếp nhận", sub: "ĐH#2026-0428-12 chuyển sang trạng thái 'Đang xử lý'", time: "Hôm qua", unread: false, target: { page: "submissions", id: "SUB-2026-0428-019" } },
+];
+
+const SUBMISSIONS = [
+  { id: "SUB-2026-0429-001", type: "Báo giá", company: "Sơn Nippon VN", contact: "Phạm Thị Lan", email: "lan.pt@nippon.vn", date: "29/04/2026 14:32", status: "new", assignee: null },
+  { id: "SUB-2026-0429-002", type: "Tư vấn KT", company: "Đại Bàng Paint", contact: "Lê Văn Tuấn", email: "tuan.lv@daibang.com", date: "29/04/2026 14:18", status: "new", assignee: null },
+  { id: "SUB-2026-0429-003", type: "Ứng tuyển", company: "—", contact: "Nguyễn Thanh Hà", email: "hanguyen@gmail.com", date: "29/04/2026 14:02", status: "new", assignee: "HR" },
+  { id: "SUB-2026-0429-004", type: "Liên hệ", company: "JR Industrial", contact: "Mark Chen", email: "mark@jr-industrial.cn", date: "29/04/2026 13:30", status: "in-progress", assignee: "Sales 1" },
+  { id: "SUB-2026-0429-005", type: "Báo giá", company: "Vinaplast", contact: "Trần Quốc Bảo", email: "bao.tq@vinaplast.vn", date: "29/04/2026 12:45", status: "in-progress", assignee: "Sales 2" },
+  { id: "SUB-2026-0428-021", type: "Tư vấn KT", company: "4 Oranges", contact: "Nguyễn Văn Hùng", email: "hung.nv@4oranges.vn", date: "28/04/2026 17:15", status: "in-progress", assignee: "Tech 1" },
+  { id: "SUB-2026-0428-019", type: "Báo giá", company: "Akzo Nobel VN", contact: "Sarah Lim", email: "sarah.lim@akzo.com", date: "28/04/2026 11:00", status: "done", assignee: "Sales 1" },
+  { id: "SUB-2026-0428-015", type: "Liên hệ", company: "Mực in Việt Đức", contact: "Lý Hoàng An", email: "an.lh@vietduc.vn", date: "28/04/2026 09:22", status: "done", assignee: "Sales 2" },
+];
+
+const PRODUCTS = [
+  { id: "agitan-120", name: "AGITAN® 120", group: "Defoamer", brand: "MÜNZING", industries: ["Sơn nước", "Mực in nước"], status: "published", lang: { vn: true, en: true, cn: false }, updated: "29/04/2026" },
+  { id: "edaplan-470", name: "EDAPLAN® 470", group: "Dispersant", brand: "MÜNZING", industries: ["Sơn nước", "Mực in"], status: "published", lang: { vn: true, en: true, cn: true }, updated: "28/04/2026" },
+  { id: "metolat-358", name: "METOLAT® 358", group: "Wetting Agent", brand: "MÜNZING", industries: ["Sơn nước"], status: "published", lang: { vn: true, en: true, cn: false }, updated: "27/04/2026" },
+  { id: "hydropalat-3475", name: "HYDROPALAT® WE 3475", group: "Rheology Modifier", brand: "MÜNZING", industries: ["Sơn nước", "Mực in"], status: "published", lang: { vn: true, en: false, cn: false }, updated: "26/04/2026" },
+  { id: "agitan-282", name: "AGITAN® 282", group: "Defoamer", brand: "MÜNZING", industries: ["Sơn dầu"], status: "draft", lang: { vn: true, en: false, cn: false }, updated: "25/04/2026" },
+  { id: "tafigel-pur-80", name: "TAFIGEL® PUR 80", group: "Rheology Modifier", brand: "MÜNZING", industries: ["Sơn nước"], status: "published", lang: { vn: true, en: true, cn: false }, updated: "24/04/2026" },
+  { id: "metolat-we-4150", name: "METOLAT® WE 4150", group: "Wax Additive", brand: "MÜNZING", industries: ["Nhựa"], status: "scheduled", lang: { vn: true, en: false, cn: false }, updated: "23/04/2026" },
+];
+
+const BANNERS = [
+  { id: 1, title: "AGITAN® thế hệ mới — đã có hàng tại VN", from: "01/04/2026", to: "30/06/2026", status: "active", lang: { vn: true, en: true, cn: false } },
+  { id: 2, title: "Triển lãm VietnamCoatings Expo 2026", from: "15/05/2026", to: "20/05/2026", status: "scheduled", lang: { vn: true, en: true, cn: true } },
+  { id: 3, title: "MÜNZING — đối tác chiến lược", from: "01/01/2026", to: "31/12/2026", status: "active", lang: { vn: true, en: true, cn: true } },
+  { id: 4, title: "Khuyến mãi Tết 2026", from: "20/01/2026", to: "15/02/2026", status: "expired", lang: { vn: true, en: false, cn: false } },
+];
+
+const ACTIVITY = [
+  { who: "Bạn", what: "đã cập nhật sản phẩm", target: "AGITAN® 120", time: "10 phút trước" },
+  { who: "Sales 1", what: "đã xử lý yêu cầu báo giá", target: "ĐH#2026-0428-12", time: "1 giờ trước" },
+  { who: "Tech 1", what: "đã trả lời tư vấn kỹ thuật", target: "4 Oranges", time: "2 giờ trước" },
+  { who: "Content", what: "đã đăng bài viết mới", target: "5 lưu ý chọn defoamer cho sơn nước", time: "3 giờ trước" },
+  { who: "HR", what: "đã thêm vị trí tuyển dụng", target: "Lab Engineer", time: "Hôm qua" },
+  { who: "Super Admin", what: "đã cập nhật banner", target: "AGITAN® thế hệ mới", time: "Hôm qua" },
+];
+
+const STATUS_LABELS = {
+  new: { lbl: "Mới", cls: "pill--brand" },
+  "in-progress": { lbl: "Đang xử lý", cls: "pill--info" },
+  done: { lbl: "Đã xử lý", cls: "pill--success" },
+  active: { lbl: "Đang chạy", cls: "pill--success" },
+  scheduled: { lbl: "Đã lên lịch", cls: "pill--info" },
+  expired: { lbl: "Hết hạn", cls: "pill--neutral" },
+  published: { lbl: "Đã xuất bản", cls: "pill--success" },
+  draft: { lbl: "Nháp", cls: "pill--neutral" },
+};
+
+// ============================================================================
+// SHARED ATOMS
+// ============================================================================
+
+function Pill({ status }) {
+  const s = STATUS_LABELS[status] || { lbl: status, cls: "pill--neutral" };
+  return <span className={`pill ${s.cls}`}>{s.lbl}</span>;
+}
+
+function LangChip({ lang }) {
+  return (
+    <span className="lang">
+      <span className={lang.vn ? "has" : ""}>VN</span>
+      <span className={lang.en ? "has" : ""}>EN</span>
+      <span className={lang.cn ? "has" : ""}>CN</span>
+    </span>
+  );
+}
+
+function Toggle({ on, onChange }) {
+  return <span className={`toggle ${on ? "on" : ""}`} onClick={() => onChange(!on)}></span>;
+}
+
+function ActionRow() {
+  return (
+    <div className="tbl__actions">
+      <button className="tbl__act" title="Xem">👁</button>
+      <button className="tbl__act" title="Sửa">✎</button>
+      <button className="tbl__act danger" title="Xóa">🗑</button>
+    </div>
+  );
+}
+
+function showToast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span>✓</span><span>${msg}</span>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 2200);
+}
+
+// Expose shared atoms to detail-pages script (separate Babel scope)
+Object.assign(window, { Pill, LangChip, Toggle, ActionRow, showToast });
+
+// ============================================================================
+// SIDEBAR & TOPBAR
+// ============================================================================
+
+function Sidebar({ active, setActive }) {
+  return (
+    <aside className="sb">
+      <div className="sb__brand">
+        <div className="sb__mark">S</div>
+        <div>
+          <div className="sb__name">STROMANN</div>
+          <div className="sb__tag">Admin · CMS</div>
+        </div>
+      </div>
+      {NAV.map((item, i) => item.group ? (
+        <div key={"g"+i} className="sb__group">{item.group}</div>
+      ) : (
+        <div key={item.id} className={`sb__item ${active === item.id ? "active" : ""}`} onClick={() => setActive(item.id)}>
+          <span className="sb__icon">{item.icon}</span>
+          <span>{item.label}</span>
+          {item.count != null && <span className={`sb__count ${item.hot ? "sb__count--hot" : ""}`}>{item.count}</span>}
+        </div>
+      ))}
+    </aside>
+  );
+}
+
+function TopBar({ openDrawer }) {
+  return (
+    <div className="topbar">
+      <div className="searchbar">
+        <span style={{ color: "var(--n-500)" }}>🔍</span>
+        <input placeholder="Tìm sản phẩm, bài viết, yêu cầu, người dùng..." />
+        <span style={{ fontSize: 11, color: "var(--n-400)", padding: "2px 6px", border: "1px solid var(--n-300)", borderRadius: 4 }}>⌘K</span>
+      </div>
+      <div className="tb__right">
+        <button className="tb__btn" title="Trợ giúp">?</button>
+        <button className="tb__btn" title="Thông báo" onClick={openDrawer}>
+          🔔<span className="dot"></span>
+        </button>
+        <a className="tb__btn" href="Stromann Hi-Fi.html" title="Xem website" target="_blank">↗</a>
+        <div className="tb__user">
+          <div className="tb__avatar">VA</div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>Văn A</div>
+            <div className="tb__role">Super Admin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// PAGES
+// ============================================================================
+
+function PageDashboard({ openDrawer, goTo }) {
+  const days = ["T2","T3","T4","T5","T6","T7","CN"];
+  const data = [12, 19, 8, 24, 16, 9, 5];
+  const max = Math.max(...data);
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Tổng quan / <span>Dashboard</span></div>
+          <h1>Chào buổi chiều, Văn A 👋</h1>
+          <p>Đây là tổng quan hoạt động website Stromann hôm nay.</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn--secondary">Xuất báo cáo</button>
+          <button className="btn btn--primary">+ Thêm nội dung</button>
+        </div>
+      </div>
+
+      <div className="stats">
+        <div className="stat stat--accent">
+          <div className="stat__lbl">Yêu cầu mới hôm nay</div>
+          <div className="stat__num">12</div>
+          <div className="stat__delta">▲ +4 so với hôm qua</div>
+        </div>
+        <div className="stat">
+          <div className="stat__lbl">Tổng sản phẩm</div>
+          <div className="stat__num">72</div>
+          <div className="stat__delta up">▲ +3 tuần này</div>
+        </div>
+        <div className="stat">
+          <div className="stat__lbl">Lượt truy cập / 7 ngày</div>
+          <div className="stat__num">8,432</div>
+          <div className="stat__delta up">▲ +12.4%</div>
+        </div>
+        <div className="stat">
+          <div className="stat__lbl">Tỷ lệ chuyển đổi</div>
+          <div className="stat__num">3.8%</div>
+          <div className="stat__delta down">▼ -0.3%</div>
+        </div>
+      </div>
+
+      <div className="row-2">
+        <div className="card">
+          <div className="card__head">
+            <h3>Yêu cầu gửi đến — 7 ngày qua</h3>
+            <button className="btn btn--ghost btn--sm">Tuần này ▾</button>
+          </div>
+          <div className="card__body">
+            <div className="chart">
+              {data.map((v, i) => (
+                <div key={i} className="bar" style={{ height: (v / max * 140) + "px" }}>
+                  <span className="bar__lbl">{days[i]}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 16, marginTop: 36, fontSize: 12, color: "var(--n-600)" }}>
+              <div><b style={{ color: "var(--brand-500)" }}>●</b> Báo giá: 38</div>
+              <div><b style={{ color: "var(--brand-500)" }}>●</b> Tư vấn KT: 24</div>
+              <div><b style={{ color: "var(--brand-500)" }}>●</b> Liên hệ: 19</div>
+              <div><b style={{ color: "var(--brand-500)" }}>●</b> Ứng tuyển: 12</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card__head">
+            <h3>Thông báo gần nhất</h3>
+            <button className="btn btn--ghost btn--sm" onClick={openDrawer}>Xem tất cả →</button>
+          </div>
+          <div className="card__body" style={{ padding: 0 }}>
+            {NOTIFICATIONS.slice(0, 4).map(n => (
+              <div key={n.id} className={`notif ${n.unread ? "unread" : ""}`} style={{ paddingLeft: 16, cursor: "pointer" }} onClick={() => n.target && goTo(n.target.page, n.target.id)}>
+                <div className={`notif__icon ${n.type}`}>{n.icon}</div>
+                <div className="notif__body">
+                  <div className="notif__title">{n.title}</div>
+                  <div className="notif__sub">{n.sub}</div>
+                  <div className="notif__time">{n.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="row-2" style={{ marginTop: 20 }}>
+        <div className="card">
+          <div className="card__head"><h3>Sản phẩm xem nhiều nhất</h3></div>
+          <div className="card__body" style={{ padding: 0 }}>
+            <table className="tbl">
+              <thead><tr><th>Sản phẩm</th><th>Nhóm</th><th style={{ textAlign: "right" }}>Lượt xem</th></tr></thead>
+              <tbody>
+                <tr><td className="tbl__name">AGITAN® 120</td><td>Defoamer</td><td style={{ textAlign: "right", fontWeight: 700 }}>1,249</td></tr>
+                <tr><td className="tbl__name">EDAPLAN® 470</td><td>Dispersant</td><td style={{ textAlign: "right", fontWeight: 700 }}>892</td></tr>
+                <tr><td className="tbl__name">METOLAT® 358</td><td>Wetting</td><td style={{ textAlign: "right", fontWeight: 700 }}>671</td></tr>
+                <tr><td className="tbl__name">HYDROPALAT® WE 3475</td><td>Rheology</td><td style={{ textAlign: "right", fontWeight: 700 }}>540</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card__head"><h3>Hoạt động gần đây</h3></div>
+          <div className="card__body">
+            <div className="activity">
+              {ACTIVITY.map((a, i) => (
+                <div key={i} className="activity__row">
+                  <span className="activity__dot"></span>
+                  <div>
+                    <div className="activity__txt"><b>{a.who}</b> {a.what} <b>{a.target}</b></div>
+                    <div className="activity__time">{a.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function PageSubmissions({ goTo }) {
+  const [filter, setFilter] = useState("all");
+  const filtered = SUBMISSIONS.filter(s => filter === "all" || s.status === filter || (filter === "type-quote" && s.type === "Báo giá") || (filter === "type-tech" && s.type === "Tư vấn KT") || (filter === "type-cv" && s.type === "Ứng tuyển") || (filter === "type-contact" && s.type === "Liên hệ"));
+
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Tổng quan / <span>Form gửi đến</span></div>
+          <h1>Form gửi đến</h1>
+          <p>Tất cả yêu cầu báo giá, tư vấn kỹ thuật, liên hệ và ứng tuyển từ website.</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn--secondary">⤓ Xuất CSV</button>
+          <button className="btn btn--secondary">⚙ Cấu hình thông báo</button>
+        </div>
+      </div>
+
+      <div className="stats">
+        <div className="stat"><div className="stat__lbl">Mới chưa xử lý</div><div className="stat__num" style={{ color: "var(--brand-500)" }}>5</div><div className="stat__delta up">cần phản hồi trong 4h</div></div>
+        <div className="stat"><div className="stat__lbl">Đang xử lý</div><div className="stat__num">11</div></div>
+        <div className="stat"><div className="stat__lbl">Đã xử lý (7 ngày)</div><div className="stat__num">93</div><div className="stat__delta up">▲ +18%</div></div>
+        <div className="stat"><div className="stat__lbl">Thời gian phản hồi TB</div><div className="stat__num">2.4h</div><div className="stat__delta up">trong SLA</div></div>
+      </div>
+
+      <div className="card">
+        <div className="card__head">
+          <div className="toolbar2" style={{ margin: 0 }}>
+            <div className="filt">
+              <button className={`chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>Tất cả</button>
+              <button className={`chip ${filter === "new" ? "active" : ""}`} onClick={() => setFilter("new")}>Mới</button>
+              <button className={`chip ${filter === "in-progress" ? "active" : ""}`} onClick={() => setFilter("in-progress")}>Đang xử lý</button>
+              <button className={`chip ${filter === "done" ? "active" : ""}`} onClick={() => setFilter("done")}>Đã xử lý</button>
+              <span style={{ width: 1, background: "var(--n-200)", margin: "0 4px" }}></span>
+              <button className={`chip ${filter === "type-quote" ? "active" : ""}`} onClick={() => setFilter("type-quote")}>💰 Báo giá</button>
+              <button className={`chip ${filter === "type-tech" ? "active" : ""}`} onClick={() => setFilter("type-tech")}>🛠 Tư vấn KT</button>
+              <button className={`chip ${filter === "type-cv" ? "active" : ""}`} onClick={() => setFilter("type-cv")}>📄 CV</button>
+              <button className={`chip ${filter === "type-contact" ? "active" : ""}`} onClick={() => setFilter("type-contact")}>✉ Liên hệ</button>
+            </div>
+          </div>
+        </div>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th><input type="checkbox" /></th>
+              <th>Mã</th>
+              <th>Loại</th>
+              <th>Khách</th>
+              <th>Thời gian</th>
+              <th>Trạng thái</th>
+              <th>Người phụ trách</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(s => (
+              <tr key={s.id} onClick={() => goTo("submissions", s.id)} style={{ cursor: "pointer" }}>
+                <td onClick={e => e.stopPropagation()}><input type="checkbox" /></td>
+                <td className="tbl__id">{s.id}</td>
+                <td>{s.type}</td>
+                <td>
+                  <div className="tbl__name">{s.contact}</div>
+                  <div className="tbl__sub">{s.company} · {s.email}</div>
+                </td>
+                <td><span style={{ fontSize: 12, color: "var(--n-600)" }}>{s.date}</span></td>
+                <td><Pill status={s.status} /></td>
+                <td>{s.assignee || <span style={{ color: "var(--n-400)" }}>Chưa gán</span>}</td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageProducts({ goTo }) {
+  const [search, setSearch] = useState("");
+  const filtered = PRODUCTS.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Sản phẩm</span></div>
+          <h1>Quản lý sản phẩm</h1>
+          <p>72 sản phẩm — phân theo nhóm chức năng, ngành ứng dụng, vấn đề kỹ thuật và thương hiệu.</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn--secondary">⤴ Import CSV</button>
+          <button className="btn btn--primary" onClick={() => goTo("products", "new")}>+ Thêm sản phẩm</button>
+        </div>
+      </div>
+
+      {false && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card__head">
+            <h3>Thêm sản phẩm mới</h3>
+            <button className="btn btn--ghost btn--sm" onClick={() => setShowForm(false)}>✕</button>
+          </div>
+          <div className="card__body">
+            <div className="field-row">
+              <div className="field"><label>Tên sản phẩm <span className="req">*</span></label><input className="input" placeholder="VD: AGITAN® 120" /></div>
+              <div className="field"><label>Slug URL</label><input className="input" placeholder="agitan-120" /></div>
+            </div>
+            <div className="field-row-3">
+              <div className="field"><label>Nhóm chức năng <span className="req">*</span></label>
+                <select className="input"><option>Defoamer</option><option>Dispersant</option><option>Wetting Agent</option><option>Rheology Modifier</option><option>Wax Additive</option></select>
+              </div>
+              <div className="field"><label>Thương hiệu</label><select className="input"><option>MÜNZING</option><option>AddWorks</option></select></div>
+              <div className="field"><label>Trạng thái</label><select className="input"><option>Nháp</option><option>Xuất bản</option><option>Lên lịch</option></select></div>
+            </div>
+            <div className="field"><label>Mô tả ngắn</label><textarea className="input" placeholder="1-2 câu mô tả vai trò sản phẩm..."></textarea></div>
+            <div className="field-row">
+              <div className="field"><label>Ngành ứng dụng</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "4px 0" }}>
+                  {["Sơn nước","Sơn dầu","Mực in nước","Mực in dầu","Nhựa","Masterbatch"].map(t => (
+                    <label key={t} style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 12, padding: "4px 10px", border: "1px solid var(--n-300)", borderRadius: 999, cursor: "pointer" }}>
+                      <input type="checkbox" /> {t}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="field"><label>Vấn đề kỹ thuật giải quyết</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "4px 0" }}>
+                  {["Bọt","Phân tán","Độ nhớt","Bề mặt","Lên màu"].map(t => (
+                    <label key={t} style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 12, padding: "4px 10px", border: "1px solid var(--n-300)", borderRadius: 999, cursor: "pointer" }}>
+                      <input type="checkbox" /> {t}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="field"><label>Tài liệu (MSDS · Brochure · COA)</label>
+              <div style={{ border: "2px dashed var(--n-300)", borderRadius: 8, padding: 24, textAlign: "center", color: "var(--n-500)", fontSize: 13 }}>
+                Kéo thả file vào đây hoặc <a style={{ color: "var(--brand-500)", fontWeight: 600 }}>chọn từ máy</a> · PDF · max 10MB
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+              <button className="btn btn--secondary" onClick={() => setShowForm(false)}>Hủy</button>
+              <button className="btn btn--ghost">Lưu nháp</button>
+              <button className="btn btn--primary" onClick={() => { setShowForm(false); showToast("Đã thêm sản phẩm thành công"); }}>Lưu & Xuất bản</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="card">
+        <div className="card__head">
+          <div className="searchbar" style={{ background: "#F4F4F5", maxWidth: 300 }}>
+            <span>🔍</span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm sản phẩm..." />
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn btn--ghost btn--sm">Tất cả nhóm ▾</button>
+            <button className="btn btn--ghost btn--sm">Tất cả ngành ▾</button>
+            <button className="btn btn--ghost btn--sm">Trạng thái ▾</button>
+          </div>
+        </div>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th><input type="checkbox" /></th>
+              <th>Sản phẩm</th>
+              <th>Nhóm</th>
+              <th>Ngành ứng dụng</th>
+              <th>Trạng thái</th>
+              <th>Ngôn ngữ</th>
+              <th>Cập nhật</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(p => (
+              <tr key={p.id} onClick={() => goTo("products", p.id)} style={{ cursor: "pointer" }}>
+                <td onClick={e => e.stopPropagation()}><input type="checkbox" /></td>
+                <td>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <div className="thumb thumb--brand"></div>
+                    <div>
+                      <div className="tbl__name">{p.name}</div>
+                      <div className="tbl__sub">{p.brand} · {p.id}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{p.group}</td>
+                <td><div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>{p.industries.map(i => <span key={i} style={{ fontSize: 11, padding: "2px 6px", background: "var(--n-100)", borderRadius: 4 }}>{i}</span>)}</div></td>
+                <td><Pill status={p.status} /></td>
+                <td><LangChip lang={p.lang} /></td>
+                <td><span style={{ fontSize: 12, color: "var(--n-600)" }}>{p.updated}</span></td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageBanners({ goTo }) {
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Banner trang chủ</span></div>
+          <h1>Banner & Slideshow</h1>
+          <p>Quản lý banner hero homepage. Hỗ trợ thời gian hiệu lực để tự bật/tắt theo lịch.</p>
+        </div>
+        <button className="btn btn--primary" onClick={() => goTo("banners", "new")}>+ Thêm banner</button>
+      </div>
+
+      <div className="card">
+        <table className="tbl">
+          <thead><tr><th></th><th>Banner</th><th>Hiệu lực từ</th><th>Đến</th><th>Trạng thái</th><th>Ngôn ngữ</th><th>Bật/Tắt</th><th></th></tr></thead>
+          <tbody>
+            {BANNERS.map(b => (
+              <tr key={b.id} onClick={() => goTo("banners", b.id)} style={{ cursor: "pointer" }}>
+                <td><div className="thumb thumb--brand"></div></td>
+                <td><div className="tbl__name">{b.title}</div><div className="tbl__sub">Banner #{b.id}</div></td>
+                <td><span style={{ fontSize: 12 }}>{b.from}</span></td>
+                <td><span style={{ fontSize: 12 }}>{b.to}</span></td>
+                <td><Pill status={b.status} /></td>
+                <td><LangChip lang={b.lang} /></td>
+                <td onClick={e => e.stopPropagation()}><Toggle on={b.status === "active"} onChange={() => showToast("Đã đổi trạng thái banner")} /></td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageIndustries({ goTo }) {
+  const items = [
+    { id: 1, code: "S", name: "Sơn (Coatings)", products: 28, articles: 7, visible: true, default: true },
+    { id: 2, code: "M", name: "Mực in (Printing Inks)", products: 18, articles: 4, visible: true, default: true },
+    { id: 3, code: "N", name: "Nhựa & Masterbatch", products: 12, articles: 3, visible: true, default: true },
+    { id: 4, code: "K", name: "Keo dán (Adhesives)", products: 5, articles: 0, visible: false, default: false },
+    { id: 5, code: "G", name: "Giấy (Paper Coatings)", products: 0, articles: 0, visible: false, default: false },
+  ];
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Ngành ứng dụng</span></div>
+          <h1>Ngành ứng dụng</h1>
+          <p>Mặc định 3 ngành chính. Có thể thêm ngành mới và bật hiển thị bất cứ lúc nào.</p>
+        </div>
+        <button className="btn btn--primary" onClick={() => goTo("industries", "new")}>+ Thêm ngành mới</button>
+      </div>
+      <div className="card">
+        <table className="tbl">
+          <thead><tr><th>Mã</th><th>Tên ngành</th><th>Sản phẩm</th><th>Bài viết</th><th>Mặc định</th><th>Hiển thị</th><th></th></tr></thead>
+          <tbody>
+            {items.map(i => (
+              <tr key={i.id} onClick={() => goTo("industries", i.id)} style={{ cursor: "pointer" }}>
+                <td><span style={{ display: "inline-flex", width: 28, height: 28, borderRadius: 6, background: "#FFE4E6", color: "var(--brand-700)", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>{i.code}</span></td>
+                <td className="tbl__name">{i.name}</td>
+                <td>{i.products}</td>
+                <td>{i.articles}</td>
+                <td>{i.default ? <Pill status="published" /> : <span style={{ color: "var(--n-400)", fontSize: 12 }}>—</span>}</td>
+                <td onClick={e => e.stopPropagation()}><Toggle on={i.visible} onChange={() => showToast("Đã đổi trạng thái ngành")} /></td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageTech({ goTo }) {
+  const items = [
+    { id: 1, name: "Phân tán (Dispersion)", subs: 2, products: 8, articles: 3 },
+    { id: 2, name: "Bọt (Foam)", subs: 2, products: 22, articles: 5 },
+    { id: 3, name: "Độ nhớt (Rheology)", subs: 2, products: 9, articles: 2 },
+    { id: 4, name: "Bề mặt (Surface)", subs: 3, products: 12, articles: 4 },
+  ];
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Vấn đề kỹ thuật</span></div>
+          <h1>Vấn đề kỹ thuật ↔ Giải pháp ↔ Sản phẩm</h1>
+          <p>Liên kết vấn đề kỹ thuật với giải pháp đề xuất và sản phẩm phù hợp.</p>
+        </div>
+        <button className="btn btn--primary" onClick={() => goTo("tech", "new")}>+ Thêm vấn đề mới</button>
+      </div>
+      <div className="card">
+        <table className="tbl">
+          <thead><tr><th>Vấn đề</th><th>Vấn đề con</th><th>Sản phẩm liên kết</th><th>Bài viết</th><th></th></tr></thead>
+          <tbody>
+            {items.map(i => (
+              <tr key={i.id} onClick={() => goTo("tech", i.id)} style={{ cursor: "pointer" }}>
+                <td className="tbl__name">{i.name}</td>
+                <td>{i.subs}</td>
+                <td><b style={{ color: "var(--brand-500)" }}>{i.products}</b> sản phẩm</td>
+                <td>{i.articles}</td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageNews({ goTo }) {
+  const items = [
+    { id: "n1", title: "5 lưu ý chọn defoamer cho sơn nước hệ acrylic", category: "Kiến thức KT", author: "Tech Team", views: 1240, status: "published", date: "25/04/2026" },
+    { id: "n2", title: "Case study: tối ưu công thức mực in flexo", category: "Ứng dụng", author: "Tech Team", views: 892, status: "published", date: "18/04/2026" },
+    { id: "n3", title: "MÜNZING ra mắt dòng AGITAN® thế hệ mới", category: "Sản phẩm", author: "Marketing", views: 1450, status: "published", date: "10/04/2026" },
+    { id: "n4", title: "Stromann tham gia VietnamCoatings Expo 2026", category: "Sự kiện", author: "Marketing", views: 320, status: "published", date: "02/04/2026" },
+    { id: "n5", title: "Wetting agent: cách chọn đúng cho từng loại pigment", category: "Kiến thức KT", author: "Tech Team", views: 0, status: "draft", date: "—" },
+  ];
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Tin tức</span></div>
+          <h1>Quản lý tin tức</h1>
+          <p>4 chuyên mục: Kiến thức kỹ thuật · Ứng dụng thực tế · Sản phẩm · Tin công ty.</p>
+        </div>
+        <button className="btn btn--primary" onClick={() => goTo("news", "new")}>+ Viết bài mới</button>
+      </div>
+      <div className="card">
+        <table className="tbl">
+          <thead><tr><th>Tiêu đề</th><th>Chuyên mục</th><th>Tác giả</th><th>Lượt xem</th><th>Trạng thái</th><th>Ngày đăng</th><th></th></tr></thead>
+          <tbody>
+            {items.map(n => (
+              <tr key={n.id} onClick={() => goTo("news", n.id)} style={{ cursor: "pointer" }}>
+                <td className="tbl__name">{n.title}</td>
+                <td><span style={{ fontSize: 11, padding: "2px 8px", background: "var(--n-100)", borderRadius: 4 }}>{n.category}</span></td>
+                <td>{n.author}</td>
+                <td>{n.views.toLocaleString()}</td>
+                <td><Pill status={n.status} /></td>
+                <td><span style={{ fontSize: 12, color: "var(--n-600)" }}>{n.date}</span></td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageRecruitment({ goTo }) {
+  const items = [
+    { id: 1, title: "Lab Engineer", dept: "Kỹ thuật", location: "TP.HCM", type: "Full-time", applicants: 12, deadline: "31/05/2026", status: "published" },
+    { id: 2, title: "Tech Sales (Sơn nước)", dept: "Kinh doanh", location: "TP.HCM", type: "Full-time", applicants: 8, deadline: "30/05/2026", status: "published" },
+    { id: 3, title: "Tech Sales miền Bắc", dept: "Kinh doanh", location: "Hà Nội", type: "Full-time", applicants: 5, deadline: "15/05/2026", status: "published" },
+    { id: 4, title: "Logistics Coordinator", dept: "Kho vận", location: "TP.HCM", type: "Full-time", applicants: 3, deadline: "20/05/2026", status: "published" },
+    { id: 5, title: "Marketing Specialist", dept: "Marketing", location: "TP.HCM", type: "Full-time", applicants: 7, deadline: "25/05/2026", status: "published" },
+    { id: 6, title: "Warehouse Staff", dept: "Kho vận", location: "Hà Nội", type: "Full-time", applicants: 0, deadline: "—", status: "draft" },
+  ];
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Nội dung / <span>Tuyển dụng</span></div>
+          <h1>Quản lý tuyển dụng</h1>
+          <p>Vị trí đang mở và hồ sơ ứng viên.</p>
+        </div>
+        <button className="btn btn--primary" onClick={() => goTo("recruitment", "new")}>+ Thêm vị trí</button>
+      </div>
+      <div className="card">
+        <table className="tbl">
+          <thead><tr><th>Vị trí</th><th>Phòng ban</th><th>Địa điểm</th><th>Hình thức</th><th>Ứng viên</th><th>Hạn nộp</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody>
+            {items.map(j => (
+              <tr key={j.id} onClick={() => goTo("recruitment", j.id)} style={{ cursor: "pointer" }}>
+                <td className="tbl__name">{j.title}</td>
+                <td>{j.dept}</td>
+                <td>{j.location}</td>
+                <td><span className="pill pill--neutral">{j.type}</span></td>
+                <td><b style={{ color: "var(--brand-500)" }}>{j.applicants}</b> CV</td>
+                <td><span style={{ fontSize: 12 }}>{j.deadline}</span></td>
+                <td><Pill status={j.status} /></td>
+                <td onClick={e => e.stopPropagation()}><ActionRow /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function PageNotifications({ goTo }) {
+  const [filter, setFilter] = useState("all");
+  const [items, setItems] = useState(NOTIFICATIONS);
+  const filtered = items.filter(n => filter === "all" || (filter === "unread" && n.unread) || filter === n.type);
+  const markAll = () => { setItems(items.map(n => ({ ...n, unread: false }))); showToast("Đã đánh dấu tất cả là đã đọc"); };
+
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">Tổng quan / <span>Thông báo</span></div>
+          <h1>Trung tâm thông báo</h1>
+          <p>Tất cả thông báo từ form, hệ thống và hoạt động đội nhóm.</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn--secondary" onClick={markAll}>✓ Đánh dấu tất cả đã đọc</button>
+          <button className="btn btn--secondary">⚙ Cài đặt thông báo</button>
+        </div>
+      </div>
+
+      <div className="row-2">
+        <div className="card">
+          <div className="card__head">
+            <div className="filt" style={{ display: "flex", gap: 6 }}>
+              <button className={`chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>Tất cả</button>
+              <button className={`chip ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Chưa đọc</button>
+              <button className={`chip ${filter === "quote" ? "active" : ""}`} onClick={() => setFilter("quote")}>Báo giá</button>
+              <button className={`chip ${filter === "tech" ? "active" : ""}`} onClick={() => setFilter("tech")}>Tư vấn KT</button>
+              <button className={`chip ${filter === "cv" ? "active" : ""}`} onClick={() => setFilter("cv")}>Ứng tuyển</button>
+              <button className={`chip ${filter === "contact" ? "active" : ""}`} onClick={() => setFilter("contact")}>Liên hệ</button>
+            </div>
+          </div>
+          <div className="card__body" style={{ padding: 0 }}>
+            {filtered.map(n => (
+              <div key={n.id} className={`notif ${n.unread ? "unread" : ""}`} style={{ cursor: "pointer" }} onClick={() => n.target && goTo(n.target.page, n.target.id)}>
+                <div className={`notif__icon ${n.type}`}>{n.icon}</div>
+                <div className="notif__body">
+                  <div className="notif__title">{n.title}</div>
+                  <div className="notif__sub">{n.sub}</div>
+                  <div className="notif__time">{n.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card__head"><h3>Cài đặt kênh nhận thông báo</h3></div>
+          <div className="card__body">
+            {[
+              { name: "📧 Email", desc: "vana@stromann.vn", on: true },
+              { name: "💬 Zalo OA", desc: "Bot Zalo Stromann", on: true },
+              { name: "📱 Push (browser)", desc: "Khi đang mở admin", on: true },
+              { name: "🔔 Telegram", desc: "Group Sales & Tech", on: false },
+              { name: "📩 SMS", desc: "Chỉ cho yêu cầu khẩn", on: false },
+            ].map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderTop: i ? "1px solid var(--n-100)" : "none" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{c.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--n-500)", marginTop: 2 }}>{c.desc}</div>
+                </div>
+                <Toggle on={c.on} onChange={() => showToast("Đã cập nhật cài đặt")} />
+              </div>
+            ))}
+            <div style={{ marginTop: 16, padding: 12, background: "#FFF8F8", border: "1px solid #FFE4E6", borderRadius: 8, fontSize: 12, color: "var(--n-700)" }}>
+              💡 Yêu cầu báo giá và tư vấn kỹ thuật khẩn sẽ <b>luôn</b> được gửi qua Email + Push, không thể tắt.
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function PageGeneric({ title, breadcrumb, desc }) {
+  return (
+    <>
+      <div className="page-h">
+        <div>
+          <div className="crumb">{breadcrumb} / <span>{title}</span></div>
+          <h1>{title}</h1>
+          <p>{desc}</p>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card__body">
+          <div className="empty">Trang quản lý {title.toLowerCase()} — bố cục tương tự các trang nội dung khác (table + filter + form thêm/sửa).</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ============================================================================
+// NOTIFICATION DRAWER
+// ============================================================================
+
+function NotifDrawer({ open, onClose, goTo }) {
+  const [filter, setFilter] = useState("all");
+  const filtered = NOTIFICATIONS.filter(n => filter === "all" || (filter === "unread" && n.unread));
+  const handleClick = (n) => {
+    if (n.target) { goTo(n.target.page, n.target.id); onClose(); }
+  };
+  return (
+    <>
+      <div className={`drawer__overlay ${open ? "open" : ""}`} onClick={onClose}></div>
+      <div className={`drawer ${open ? "open" : ""}`}>
+        <div className="drawer__head">
+          <h3>Thông báo</h3>
+          <button className="btn btn--ghost btn--sm" onClick={onClose}>✕</button>
+        </div>
+        <div className="drawer__filter">
+          <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>Tất cả ({NOTIFICATIONS.length})</button>
+          <button className={filter === "unread" ? "active" : ""} onClick={() => setFilter("unread")}>Chưa đọc ({NOTIFICATIONS.filter(n => n.unread).length})</button>
+          <span style={{ flex: 1 }}></span>
+          <button onClick={() => showToast("Đã đánh dấu đã đọc")}>✓ Tất cả</button>
+        </div>
+        <div className="drawer__list">
+          {filtered.map(n => (
+            <div key={n.id} className={`notif ${n.unread ? "unread" : ""}`} onClick={() => handleClick(n)} style={{ cursor: "pointer" }}>
+              <div className={`notif__icon ${n.type}`}>{n.icon}</div>
+              <div className="notif__body">
+                <div className="notif__title">{n.title}</div>
+                <div className="notif__sub">{n.sub}</div>
+                <div className="notif__time">{n.time}</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", color: "var(--n-400)", fontSize: 16 }}>›</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ============================================================================
+// APP
+// ============================================================================
+
+function App() {
+  // route can be: { page: 'products' } or { page: 'products', id: 'agitan-120' }
+  const [route, setRoute] = useState({ page: "dashboard" });
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const active = route.page;
+  const setActive = (page) => setRoute({ page });
+  const goTo = (page, id) => setRoute({ page, id });
+  const goBack = () => setRoute({ page: route.page });
+
+  // simulate incoming notification
+  useEffect(() => {
+    const t = setTimeout(() => showToast("🔔 Yêu cầu báo giá mới — Cty Sơn Nippon VN"), 2500);
+    return () => clearTimeout(t);
+  }, []);
+
+  const renderPage = () => {
+    const D = window.AdminDetailPages || {};
+    // detail routes
+    if (route.id) {
+      switch (route.page) {
+        case "products": return <D.PageProductDetail id={route.id} goBack={goBack} />;
+        case "submissions": return <D.PageSubmissionDetail id={route.id} goBack={goBack} />;
+        case "banners": return <D.PageBannerDetail id={route.id} goBack={goBack} />;
+        case "news": return <D.PageNewsDetail id={route.id} goBack={goBack} />;
+        case "recruitment": return <D.PageJobDetail id={route.id} goBack={goBack} goTo={goTo} />;
+        case "tech": return <D.PageTechDetail id={route.id} goBack={goBack} />;
+        case "industries": return <D.PageIndustryDetail id={route.id} goBack={goBack} />;
+      }
+    }
+    switch (active) {
+      case "dashboard": return <PageDashboard openDrawer={() => setDrawerOpen(true)} goTo={goTo} />;
+      case "notifications": return <PageNotifications goTo={goTo} />;
+      case "submissions": return <PageSubmissions goTo={goTo} />;
+      case "products": return <PageProducts goTo={goTo} />;
+      case "banners": return <PageBanners goTo={goTo} />;
+      case "industries": return <PageIndustries goTo={goTo} />;
+      case "tech": return <PageTech goTo={goTo} />;
+      case "news": return <PageNews goTo={goTo} />;
+      case "recruitment": return <PageRecruitment goTo={goTo} />;
+      case "users": return <PageGeneric title="Người dùng & quyền" breadcrumb="Hệ thống" desc="Phân quyền theo nhóm: Super Admin · Sales · Kỹ thuật · Content · HR." />;
+      case "languages": return <PageGeneric title="Đa ngôn ngữ" breadcrumb="Hệ thống" desc="Quản lý chuỗi VN / EN / CN cho mọi nội dung động." />;
+      case "seo": return <PageGeneric title="SEO" breadcrumb="Hệ thống" desc="Meta title / description / OG image cho từng trang, sản phẩm, bài viết." />;
+      case "logs": return <PageGeneric title="Log hoạt động" breadcrumb="Hệ thống" desc="Toàn bộ thao tác admin được ghi lại để kiểm tra." />;
+      case "settings": return <PageGeneric title="Cấu hình" breadcrumb="Hệ thống" desc="Hotline · Email · Bản đồ · Mạng xã hội · CAPTCHA · SMTP." />;
+      default: return <PageDashboard openDrawer={() => setDrawerOpen(true)} />;
+    }
+  };
+
+  return (
+    <div className="app">
+      <Sidebar active={active} setActive={setActive} />
+      <div className="main">
+        <TopBar openDrawer={() => setDrawerOpen(true)} />
+        <div className="content">
+          {renderPage()}
+        </div>
+      </div>
+      <NotifDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} goTo={goTo} />
+    </div>
+  );
+}
+
+// Defer mount until all babel scripts are parsed (detail-pages loads after)
+window.addEventListener("load", () => {
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+});
+</script>
+
+<script type="text/babel" data-presets="env,react" src="admin-detail-pages.jsx"></script>
+</body>
+</html>
