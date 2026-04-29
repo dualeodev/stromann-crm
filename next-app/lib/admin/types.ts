@@ -1,3 +1,11 @@
+export type AdminRole = "super_admin" | "editor" | "viewer";
+
+export type AdminUser = {
+  username: string;
+  full_name: string;
+  role: AdminRole;
+};
+
 export type AdminPageId =
   | "dashboard"
   | "notifications"

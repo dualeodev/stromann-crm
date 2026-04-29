@@ -3,3 +3,12 @@ node_modules
 out
 .env*.local
 .DS_Store
+
+# Tooling / generated
+.claude/
+tsconfig.tsbuildinfo
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+

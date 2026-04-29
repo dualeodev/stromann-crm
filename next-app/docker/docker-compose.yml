@@ -1,0 +1,68 @@
+# Production stack: Next.js app + Caddy reverse-proxy in front of the official
+# Supabase self-host compose. Run from the `docker/` directory:
+#
+#   docker compose --env-file .env up -d --build
+#
+# Prereqs (one-time on the server):
+#   1. clone https://github.com/supabase/supabase next to this repo at
+#      ../../supabase  (so the path below resolves)
+#   2. cp ../../supabase/docker/.env.example ../../supabase/docker/.env  and
+#      fill it in (POSTGRES_PASSWORD, JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY,
+#      DASHBOARD_USERNAME / DASHBOARD_PASSWORD, SITE_URL=https://${DOMAIN},
+#      API_EXTERNAL_URL=https://${DOMAIN}/supabase  ...)
+#   3. cp .env.example .env  (this folder)  and fill in DOMAIN + the same
+#      ANON_KEY / SERVICE_ROLE_KEY values
+#
+# The `include:` directive (Compose v2.20+) merges the upstream Supabase
+# compose so we don't have to fork/maintain a copy of it. Our services join
+# the same default network and can address Supabase services by name (kong,
+# db, etc.).
+
+include:
+  - path: ../../supabase/docker/docker-compose.yml
+    env_file: ../../supabase/docker/.env
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        # Public URL of the Supabase API as seen by the browser. Caddy proxies
+        # /supabase/* on DOMAIN to kong:8000.
+        NEXT_PUBLIC_SUPABASE_URL: https://${DOMAIN}/supabase
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+    image: stromann-app:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Server-side reads of these env vars (RSC, middleware, server actions).
+      NEXT_PUBLIC_SUPABASE_URL: https://${DOMAIN}/supabase
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+    depends_on:
+      kong:
+        condition: service_started
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - kong
+
+volumes:
+  caddy_data:
+  caddy_config:
