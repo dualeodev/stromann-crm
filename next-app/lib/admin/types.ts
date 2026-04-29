@@ -1,3 +1,13 @@
+import type { LucideIcon } from "lucide-react";
+
+export type AdminRole = "super_admin" | "editor" | "viewer";
+
+export type AdminUser = {
+  username: string;
+  full_name: string;
+  role: AdminRole;
+};
+
 export type AdminPageId =
   | "dashboard"
   | "notifications"
@@ -21,7 +31,7 @@ export interface NavGroup {
 export interface NavItem {
   id: AdminPageId;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   count?: number;
   hot?: boolean;
 }
@@ -38,7 +48,7 @@ export type NotifType = "quote" | "tech" | "cv" | "contact";
 export interface AdminNotification {
   id: number;
   type: NotifType;
-  icon: string;
+  icon: LucideIcon;
   title: string;
   sub: string;
   time: string;
@@ -78,15 +88,26 @@ export interface AdminProduct {
   updated: string;
 }
 
-export type BannerStatus = "active" | "scheduled" | "expired";
+export type BannerStatus = "active" | "scheduled" | "expired" | "disabled";
+export type BannerPosition = "hero_home" | "product_hero" | "home_mid";
 
-export interface Banner {
-  id: number;
+export interface BannerRow {
+  id: string;
   title: string;
-  from: string;
-  to: string;
-  status: BannerStatus;
-  lang: LangFlags;
+  description: string | null;
+  cta_label: string | null;
+  cta_href: string | null;
+  image_path: string | null;
+  position: BannerPosition;
+  sort_order: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_enabled: boolean;
+  lang_vn: boolean;
+  lang_en: boolean;
+  lang_cn: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ActivityEntry {
@@ -99,6 +120,7 @@ export interface ActivityEntry {
 export type AdminStatus =
   | "new"
   | "in-progress"
+  | "disabled"
   | "done"
   | "active"
   | "scheduled"

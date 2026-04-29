@@ -1,9 +1,27 @@
+import {
+  Bell,
+  Briefcase,
+  DollarSign,
+  Factory,
+  FileText,
+  Globe,
+  Image as ImageIcon,
+  Inbox,
+  LayoutDashboard,
+  Mail,
+  Newspaper,
+  Package,
+  ScrollText,
+  Search,
+  Settings,
+  Users,
+  Wrench,
+} from "lucide-react";
 import type {
   ActivityEntry,
   AdminNotification,
   AdminProduct,
   AdminStatus,
-  Banner,
   NavEntry,
   StatusLabel,
   Submission,
@@ -11,35 +29,35 @@ import type {
 
 export const NAV: NavEntry[] = [
   { group: "Tổng quan" },
-  { id: "dashboard",     label: "Dashboard",       icon: "📊" },
-  { id: "notifications", label: "Thông báo",        icon: "🔔", count: 12, hot: true },
-  { id: "submissions",   label: "Form gửi đến",     icon: "📥", count: 28, hot: true },
+  { id: "dashboard",     label: "Dashboard",       icon: LayoutDashboard },
+  { id: "notifications", label: "Thông báo",        icon: Bell,       count: 12, hot: true },
+  { id: "submissions",   label: "Form gửi đến",     icon: Inbox,      count: 28, hot: true },
 
   { group: "Nội dung" },
-  { id: "banners",       label: "Banner trang chủ", icon: "🖼" },
-  { id: "products",      label: "Sản phẩm",         icon: "📦", count: 72 },
-  { id: "industries",    label: "Ngành ứng dụng",   icon: "🏭", count: 3 },
-  { id: "tech",          label: "Vấn đề kỹ thuật",  icon: "🛠", count: 4 },
-  { id: "news",          label: "Tin tức",          icon: "📰", count: 24 },
-  { id: "recruitment",   label: "Tuyển dụng",       icon: "💼", count: 6 },
+  { id: "banners",       label: "Banner trang chủ", icon: ImageIcon },
+  { id: "products",      label: "Sản phẩm",         icon: Package,    count: 72 },
+  { id: "industries",    label: "Ngành ứng dụng",   icon: Factory,    count: 3 },
+  { id: "tech",          label: "Vấn đề kỹ thuật",  icon: Wrench,     count: 4 },
+  { id: "news",          label: "Tin tức",          icon: Newspaper,  count: 24 },
+  { id: "recruitment",   label: "Tuyển dụng",       icon: Briefcase,  count: 6 },
 
   { group: "Hệ thống" },
-  { id: "users",         label: "Người dùng & quyền", icon: "👥" },
-  { id: "languages",     label: "Đa ngôn ngữ",       icon: "🌐" },
-  { id: "seo",           label: "SEO",                icon: "🔍" },
-  { id: "logs",          label: "Log hoạt động",     icon: "📜" },
-  { id: "settings",      label: "Cấu hình",          icon: "⚙" },
+  { id: "users",         label: "Người dùng & quyền", icon: Users },
+  { id: "languages",     label: "Đa ngôn ngữ",       icon: Globe },
+  { id: "seo",           label: "SEO",                icon: Search },
+  { id: "logs",          label: "Log hoạt động",     icon: ScrollText },
+  { id: "settings",      label: "Cấu hình",          icon: Settings },
 ];
 
 export const NOTIFICATIONS: AdminNotification[] = [
-  { id: 1, type: "quote",   icon: "💰", title: "Yêu cầu báo giá mới — Cty Sơn Nippon VN", sub: "AGITAN® 120 (200kg) + EDAPLAN® 470 (50kg)", time: "2 phút trước",  unread: true,  target: { page: "submissions", id: "SUB-2026-0429-001" } },
-  { id: 2, type: "tech",    icon: "🛠", title: "Tư vấn kỹ thuật — Anh Tuấn (Đại Bàng Paint)",    sub: "Vấn đề bọt khí trên mực in flexo gốc nước",       time: "12 phút trước", unread: true,  target: { page: "submissions", id: "SUB-2026-0429-002" } },
-  { id: 3, type: "cv",      icon: "📄", title: "CV ứng tuyển — Lab Engineer",                     sub: "Nguyễn Thanh Hà — 3 năm KN MÜNZING",              time: "28 phút trước", unread: true,  target: { page: "recruitment", id: 1 } },
-  { id: 4, type: "contact", icon: "✉", title: "Liên hệ chung — JR Industrial",                   sub: "Yêu cầu mẫu thử HYDROPALAT® WE 3475",             time: "1 giờ trước",   unread: true,  target: { page: "submissions", id: "SUB-2026-0429-004" } },
-  { id: 5, type: "quote",   icon: "💰", title: "Yêu cầu báo giá — Vinaplast",                     sub: "5 mã wax additive cho masterbatch PE",            time: "2 giờ trước",   unread: false, target: { page: "submissions", id: "SUB-2026-0429-005" } },
-  { id: 6, type: "tech",    icon: "🛠", title: "Tư vấn kỹ thuật — Cty Sơn 4 Oranges",             sub: "Tối ưu công thức sơn xây dựng",                    time: "3 giờ trước",   unread: false, target: { page: "submissions", id: "SUB-2026-0428-021" } },
-  { id: 7, type: "cv",      icon: "📄", title: "CV ứng tuyển — Tech Sales miền Bắc",              sub: "Trần Minh Quân",                                   time: "5 giờ trước",   unread: false, target: { page: "recruitment", id: 3 } },
-  { id: 8, type: "quote",   icon: "💰", title: "Báo giá đã được Sales tiếp nhận",                 sub: "ĐH#2026-0428-12 chuyển sang trạng thái 'Đang xử lý'", time: "Hôm qua", unread: false, target: { page: "submissions", id: "SUB-2026-0428-019" } },
+  { id: 1, type: "quote",   icon: DollarSign, title: "Yêu cầu báo giá mới — Cty Sơn Nippon VN", sub: "AGITAN® 120 (200kg) + EDAPLAN® 470 (50kg)", time: "2 phút trước",  unread: true,  target: { page: "submissions", id: "SUB-2026-0429-001" } },
+  { id: 2, type: "tech",    icon: Wrench,     title: "Tư vấn kỹ thuật — Anh Tuấn (Đại Bàng Paint)",    sub: "Vấn đề bọt khí trên mực in flexo gốc nước",       time: "12 phút trước", unread: true,  target: { page: "submissions", id: "SUB-2026-0429-002" } },
+  { id: 3, type: "cv",      icon: FileText,   title: "CV ứng tuyển — Lab Engineer",                     sub: "Nguyễn Thanh Hà — 3 năm KN MÜNZING",              time: "28 phút trước", unread: true,  target: { page: "recruitment", id: 1 } },
+  { id: 4, type: "contact", icon: Mail,       title: "Liên hệ chung — JR Industrial",                   sub: "Yêu cầu mẫu thử HYDROPALAT® WE 3475",             time: "1 giờ trước",   unread: true,  target: { page: "submissions", id: "SUB-2026-0429-004" } },
+  { id: 5, type: "quote",   icon: DollarSign, title: "Yêu cầu báo giá — Vinaplast",                     sub: "5 mã wax additive cho masterbatch PE",            time: "2 giờ trước",   unread: false, target: { page: "submissions", id: "SUB-2026-0429-005" } },
+  { id: 6, type: "tech",    icon: Wrench,     title: "Tư vấn kỹ thuật — Cty Sơn 4 Oranges",             sub: "Tối ưu công thức sơn xây dựng",                    time: "3 giờ trước",   unread: false, target: { page: "submissions", id: "SUB-2026-0428-021" } },
+  { id: 7, type: "cv",      icon: FileText,   title: "CV ứng tuyển — Tech Sales miền Bắc",              sub: "Trần Minh Quân",                                   time: "5 giờ trước",   unread: false, target: { page: "recruitment", id: 3 } },
+  { id: 8, type: "quote",   icon: DollarSign, title: "Báo giá đã được Sales tiếp nhận",                 sub: "ĐH#2026-0428-12 chuyển sang trạng thái 'Đang xử lý'", time: "Hôm qua", unread: false, target: { page: "submissions", id: "SUB-2026-0428-019" } },
 ];
 
 export const SUBMISSIONS: Submission[] = [
@@ -63,13 +81,6 @@ export const ADMIN_PRODUCTS: AdminProduct[] = [
   { id: "metolat-we-4150", name: "METOLAT® WE 4150",    group: "Wax Additive",     brand: "MÜNZING", industries: ["Nhựa"],                   status: "scheduled", lang: { vn: true,  en: false, cn: false }, updated: "23/04/2026" },
 ];
 
-export const BANNERS: Banner[] = [
-  { id: 1, title: "AGITAN® thế hệ mới — đã có hàng tại VN", from: "01/04/2026", to: "30/06/2026", status: "active",    lang: { vn: true, en: true,  cn: false } },
-  { id: 2, title: "Triển lãm VietnamCoatings Expo 2026",     from: "15/05/2026", to: "20/05/2026", status: "scheduled", lang: { vn: true, en: true,  cn: true  } },
-  { id: 3, title: "MÜNZING — đối tác chiến lược",            from: "01/01/2026", to: "31/12/2026", status: "active",    lang: { vn: true, en: true,  cn: true  } },
-  { id: 4, title: "Khuyến mãi Tết 2026",                     from: "20/01/2026", to: "15/02/2026", status: "expired",   lang: { vn: true, en: false, cn: false } },
-];
-
 export const ACTIVITY: ActivityEntry[] = [
   { who: "Bạn",          what: "đã cập nhật sản phẩm",         target: "AGITAN® 120",                         time: "10 phút trước" },
   { who: "Sales 1",      what: "đã xử lý yêu cầu báo giá",     target: "ĐH#2026-0428-12",                     time: "1 giờ trước"   },
@@ -86,6 +97,7 @@ export const STATUS_LABELS: Record<AdminStatus, StatusLabel> = {
   active:        { lbl: "Đang chạy",   cls: "pill--success" },
   scheduled:     { lbl: "Đã lên lịch", cls: "pill--info"    },
   expired:       { lbl: "Hết hạn",     cls: "pill--neutral" },
+  disabled:      { lbl: "Tắt",         cls: "pill--neutral" },
   published:     { lbl: "Đã xuất bản", cls: "pill--success" },
   draft:         { lbl: "Nháp",        cls: "pill--neutral" },
 };

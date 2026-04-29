@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 
 export function DetailHeader({
   breadcrumb,
@@ -20,8 +21,11 @@ export function DetailHeader({
     <div className="page-h mb-6">
       <div>
         <div className="crumb">
-          <Link href={backHref} className="cursor-pointer text-brand-500">
-            ← {breadcrumb}
+          <Link
+            href={backHref}
+            className="cursor-pointer text-brand-500 inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={14} /> {breadcrumb}
           </Link>{" "}
           / <span>{title}</span>
         </div>

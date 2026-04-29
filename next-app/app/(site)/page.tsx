@@ -2,8 +2,11 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Tag, Btn, SectHead, ProductImage, IndustryImage, LinkArrow } from "@/components/ui";
 import { INDUSTRIES, WHY_ROWS, PRODUCTS, NEWS } from "@/lib/data";
+import { listActiveBanners, bannerImageUrl } from "@/lib/admin/banners";
+import type { BannerRow } from "@/lib/admin/types";
 
-function HomeHero() {
+function HomeHero({ banner }: { banner: BannerRow | null }) {
+  const imgUrl = banner ? bannerImageUrl(banner.image_path) : null;
   return (
     <div className="hero hero--figma">
       <div className="hero__left">
@@ -26,11 +29,47 @@ function HomeHero() {
       </div>
 
       <div className="hero__right">
-        <div className="hero-banner">
-          <div className="hero-banner__caption">
-            [ Banner slideshow — admin có thể đổi theo từng chiến dịch ]
+        {banner ? (
+          <Link
+            href={banner.cta_href || "#"}
+            className="hero-banner relative overflow-hidden block group"
+            style={
+              imgUrl
+                ? { background: `url(${imgUrl}) center/cover no-repeat` }
+                : { background: "linear-gradient(135deg, #E11D2C, #931017)" }
+            }
+          >
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 75%)",
+              }}
+              aria-hidden="true"
+            />
+            <div className="relative z-10 flex flex-col items-center justify-end h-full text-center px-8 pb-8 text-white">
+              {banner.description && (
+                <div className="text-[11px] uppercase tracking-[0.18em] font-bold opacity-95">
+                  {banner.description}
+                </div>
+              )}
+              <div className="text-[26px] font-extrabold mt-3 leading-tight max-w-[420px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
+                {banner.title}
+              </div>
+              {banner.cta_label && (
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold border-b-2 border-white/70 pb-1 transition-[gap] group-hover:gap-3">
+                  {banner.cta_label} <span aria-hidden="true">→</span>
+                </span>
+              )}
+            </div>
+          </Link>
+        ) : (
+          <div className="hero-banner">
+            <div className="hero-banner__caption">
+              [ Banner slideshow — admin có thể đổi theo từng chiến dịch ]
+            </div>
           </div>
-        </div>
+        )}
         <Link href="/contact" className="hero-cta-card">
           <div className="hero-cta-card__icon">▢</div>
           <div>
@@ -46,10 +85,12 @@ function HomeHero() {
 
 const STAT_BAR_STYLE = (w: string): CSSProperties => ({ width: w });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const heroBanners = await listActiveBanners("hero_home");
+  const banner = heroBanners[0] ?? null;
   return (
     <>
-      <HomeHero />
+      <HomeHero banner={banner} />
 
       {/* Industries — Paint Chip Catalog */}
       <section className="section section--alt section--swatch">

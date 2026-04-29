@@ -1,0 +1,32 @@
+# Caddy auto-issues Let's Encrypt certs for {$DOMAIN}.
+# - https://{$DOMAIN}                → Next.js app
+# - https://{$DOMAIN}/supabase/*     → Supabase API gateway (kong)
+# - https://studio.{$DOMAIN}         → Supabase Studio (basic auth)
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Strip the /supabase prefix before forwarding to kong, so the SDK URL
+	# https://DOMAIN/supabase  hits kong:8000 root.
+	handle_path /supabase/* {
+		reverse_proxy kong:8000
+	}
+
+	handle {
+		reverse_proxy app:3000
+	}
+}
+
+studio.{$DOMAIN} {
+	encode zstd gzip
+	# Studio has no auth of its own — gate it at the proxy. Generate a hash
+	# with: docker run --rm caddy:2-alpine caddy hash-password
+	basic_auth {
+		# {$STUDIO_AUTH_USER} {$STUDIO_AUTH_HASH}
+	}
+	reverse_proxy studio:3000
+}
