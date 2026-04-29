@@ -6,11 +6,12 @@ import {
   DataTable,
   EmptyState,
   LangChip,
+  Pagination,
   Pill,
   type Column,
 } from "@/components/admin/atoms";
 import {
-  listBanners,
+  listBannersPaged,
   bannerStatus,
   bannerLangFlags,
   bannerImageUrl,
@@ -111,8 +112,19 @@ const columns: Column<BannerRow>[] = [
   },
 ];
 
-export default async function BannersPage() {
-  const banners = await listBanners();
+const PAGE_SIZE = 20;
+
+function buildHref(base: string, page: number) {
+  return page === 1 ? base : `${base}?page=${page}`;
+}
+
+export default async function BannersPage({
+  searchParams = {},
+}: {
+  searchParams?: { page?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page ?? 1));
+  const { rows: banners, total } = await listBannersPaged({ page, pageSize: PAGE_SIZE });
 
   return (
     <>
@@ -142,6 +154,12 @@ export default async function BannersPage() {
               }
             />
           }
+        />
+        <Pagination
+          total={total}
+          page={page}
+          pageSize={PAGE_SIZE}
+          hrefFor={(p) => buildHref("/admin/banners", p)}
         />
       </Card>
     </>

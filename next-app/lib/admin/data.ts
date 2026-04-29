@@ -4,6 +4,7 @@ import {
   DollarSign,
   Factory,
   FileText,
+  FolderTree,
   Globe,
   Image as ImageIcon,
   Inbox,
@@ -35,9 +36,10 @@ export const NAV: NavEntry[] = [
 
   { group: "Nội dung" },
   { id: "banners",       label: "Banner trang chủ", icon: ImageIcon },
-  { id: "products",      label: "Sản phẩm",         icon: Package,    count: 72 },
-  { id: "industries",    label: "Ngành ứng dụng",   icon: Factory,    count: 3 },
-  { id: "tech",          label: "Vấn đề kỹ thuật",  icon: Wrench,     count: 4 },
+  { id: "categories",    label: "Danh mục",         icon: FolderTree },
+  { id: "products",      label: "Sản phẩm",         icon: Package },
+  { id: "industries",    label: "Ngành ứng dụng",   icon: Factory },
+  { id: "tech",          label: "Vấn đề kỹ thuật",  icon: Wrench },
   { id: "news",          label: "Tin tức",          icon: Newspaper,  count: 24 },
   { id: "recruitment",   label: "Tuyển dụng",       icon: Briefcase,  count: 6 },
 

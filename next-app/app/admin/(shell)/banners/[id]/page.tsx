@@ -14,8 +14,10 @@ import {
 } from "@/components/admin/atoms";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { getBanner, bannerStatus, bannerImageUrl } from "@/lib/admin/banners";
+import { listProducts } from "@/lib/catalog";
 import { saveBannerAction, deleteBannerAction } from "../actions";
 import { BannerImagePicker } from "./BannerImagePicker";
+import { BannerCtaPicker } from "./BannerCtaPicker";
 
 const POSITIONS = [
   { value: "hero_home", label: "Hero homepage" },
@@ -44,6 +46,13 @@ export default async function BannerDetailPage({
   const imgUrl = banner ? bannerImageUrl(banner.image_path) : null;
   const status = banner ? bannerStatus(banner) : null;
   const title = isNew ? "Tạo banner mới" : banner!.title;
+
+  const { rows: allProducts } = await listProducts({
+    publishedOnly: true,
+    pageSize: 500,
+    sort: "az",
+  });
+  const productOptions = allProducts.map((p) => ({ slug: p.slug, name: p.name }));
 
   return (
     <form action={saveBannerAction} encType="multipart/form-data">
@@ -115,10 +124,10 @@ export default async function BannerDetailPage({
                 label="Text nút CTA"
                 defaultValue={banner?.cta_label ?? ""}
               />
-              <Input
+              <BannerCtaPicker
                 name="cta_href"
-                label="Link đích"
-                defaultValue={banner?.cta_href ?? ""}
+                initialValue={banner?.cta_href ?? ""}
+                products={productOptions}
               />
             </div>
           </FormSection>

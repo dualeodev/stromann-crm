@@ -1,37 +1,3 @@
-export type ProductGroup =
-  | "DEFOAMER"
-  | "DISPERSANT"
-  | "WETTING AGENT"
-  | "RHEOLOGY"
-  | "WAX"
-  | "LEVELING";
-
-export interface Product {
-  id: string;
-  group: ProductGroup;
-  name: string;
-  desc: string;
-  brand: string;
-  featured?: boolean;
-}
-
-export interface NavProductGroup {
-  group: string;
-  count: number;
-}
-
-export interface Industry {
-  id: string;
-  code: string;
-  title: string;
-  swatch: string;
-  paint: string;
-  finish: string;
-  desc: string;
-  chips: string[];
-  products: number;
-}
-
 export interface WhyRow {
   num: string;
   title: string;

@@ -2,54 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Tag, ProductImage } from "@/components/ui";
 import Breadcrumb from "@/components/Breadcrumb";
-import { PRODUCTS } from "@/lib/data";
+import {
+  countProductsPerCategory,
+  countProductsPerIndustry,
+  countProductsPerTechIssue,
+  listCategories,
+  listProducts,
+  listProductBrands,
+  listProductIndustries,
+  listTechnicalIssues,
+  publicAssetUrl,
+  PRODUCT_BUCKET,
+} from "@/lib/catalog";
 import { SortSelect } from "./SortSelect";
+import { FilterGroup } from "./FilterGroup";
 
 export const metadata: Metadata = { title: "Sản phẩm — Stromann Việt Nam" };
 
-interface FilterGroupDef {
-  id: "g" | "i" | "p";
-  label: string;
-  options: Array<{ v: string; l: string; c: number }>;
-}
-
-const FILTER_GROUPS: FilterGroupDef[] = [
-  {
-    id: "g",
-    label: "Nhóm sản phẩm",
-    options: [
-      { v: "DEFOAMER", l: "Defoamer", c: 22 },
-      { v: "DISPERSANT", l: "Dispersant", c: 18 },
-      { v: "WETTING AGENT", l: "Wetting Agent", c: 12 },
-      { v: "RHEOLOGY", l: "Rheology Modifier", c: 9 },
-      { v: "WAX", l: "Wax Additives", c: 7 },
-      { v: "LEVELING", l: "Leveling", c: 5 },
-    ],
-  },
-  {
-    id: "i",
-    label: "Ngành ứng dụng",
-    options: [
-      { v: "coatings", l: "Sơn nước", c: 28 },
-      { v: "coatings-solvent", l: "Sơn dầu / sơn bóng", c: 18 },
-      { v: "ink-water", l: "Mực in gốc nước", c: 14 },
-      { v: "ink-solvent", l: "Mực in gốc dầu", c: 8 },
-      { v: "plastic", l: "Nhựa / Masterbatch", c: 11 },
-    ],
-  },
-  {
-    id: "p",
-    label: "Vấn đề kỹ thuật",
-    options: [
-      { v: "foam", l: "Bọt khí", c: 22 },
-      { v: "viscosity", l: "Độ nhớt", c: 9 },
-      { v: "surface", l: "Bề mặt", c: 12 },
-      { v: "color", l: "Lên màu", c: 7 },
-    ],
-  },
-];
-
-const CHIPS = ["All", "Best", "New", "Featured"] as const;
+const CHIPS = ["All", "Featured", "New"] as const;
 const SORTS = ["Mới nhất", "A → Z", "Z → A", "Phổ biến"];
 
 type RawParams = Record<string, string | string[] | undefined>;
@@ -83,18 +53,87 @@ function toggledList(list: string[], value: string): string | undefined {
   return set.size > 0 ? Array.from(set).join(",") : undefined;
 }
 
-export default function ProductsPage({ searchParams = {} }: { searchParams?: RawParams }) {
-  const groupSel    = asList(searchParams.g);
-  const chip        = asString(searchParams.chip) ?? "All";
-  const sort        = asString(searchParams.sort) ?? SORTS[0];
-  const pageNum     = Math.max(1, Number(asString(searchParams.page) ?? 1));
+function sortKey(label: string): "newest" | "az" | "za" | "popular" {
+  switch (label) {
+    case "A → Z": return "az";
+    case "Z → A": return "za";
+    case "Phổ biến": return "popular";
+    default: return "newest";
+  }
+}
 
-  const filtered = PRODUCTS.filter((p) => {
-    if (groupSel.length && !groupSel.some((v) => p.group.includes(v))) return false;
-    if (chip === "Featured" && !p.featured) return false;
-    if (chip === "New" && !["agitan-120", "edaplan-470"].includes(p.id)) return false;
-    return true;
-  });
+interface FacetOption {
+  v: string;
+  l: string;
+  c: number;
+}
+interface FacetGroup {
+  id: "g" | "i" | "p" | "b";
+  label: string;
+  options: FacetOption[];
+}
+
+export default async function ProductsPage({ searchParams = {} }: { searchParams?: RawParams }) {
+  const groupSel = asList(searchParams.g);
+  const indSel   = asList(searchParams.i);
+  const techSel  = asList(searchParams.p);
+  const brandSel = asList(searchParams.b);
+  const chip     = asString(searchParams.chip) ?? "All";
+  const sort     = asString(searchParams.sort) ?? SORTS[0];
+  const pageNum  = Math.max(1, Number(asString(searchParams.page) ?? 1));
+
+  const [
+    { rows: products, total },
+    categories,
+    industries,
+    techs,
+    brands,
+    catCounts,
+    indCounts,
+    techCounts,
+  ] = await Promise.all([
+    listProducts({
+      publishedOnly: true,
+      categorySlugs: groupSel,
+      industrySlugs: indSel,
+      techSlugs: techSel,
+      brands: brandSel,
+      featuredOnly: chip === "Featured",
+      sort: sortKey(sort),
+      page: pageNum,
+      pageSize: 24,
+    }),
+    listCategories({ enabledOnly: true }),
+    listProductIndustries({ enabledOnly: true }),
+    listTechnicalIssues({ enabledOnly: true }),
+    listProductBrands({ publishedOnly: true }),
+    countProductsPerCategory(),
+    countProductsPerIndustry(),
+    countProductsPerTechIssue(),
+  ]);
+
+  const facetGroups: FacetGroup[] = [
+    {
+      id: "g",
+      label: "Danh mục",
+      options: categories.map((c) => ({ v: c.slug, l: c.name, c: catCounts[c.id] ?? 0 })),
+    },
+    {
+      id: "i",
+      label: "Ngành ứng dụng",
+      options: industries.map((i) => ({ v: i.slug, l: i.name, c: indCounts[i.id] ?? 0 })),
+    },
+    {
+      id: "p",
+      label: "Vấn đề kỹ thuật",
+      options: techs.map((t) => ({ v: t.slug, l: t.name, c: techCounts[t.id] ?? 0 })),
+    },
+    {
+      id: "b",
+      label: "Thương hiệu",
+      options: brands.map((b) => ({ v: b.brand, l: b.brand, c: b.count })),
+    },
+  ];
 
   return (
     <>
@@ -112,16 +151,14 @@ export default function ProductsPage({ searchParams = {} }: { searchParams?: Raw
             <Link className="filter-panel__clear" href="/products">Clear all</Link>
           </div>
 
-          {FILTER_GROUPS.map((g) => {
+          {facetGroups.map((g) => {
             const selected = asList(searchParams[g.id]);
             return (
-              <details key={g.id} open className="filter-group">
-                <summary className="filter-group__head list-none cursor-pointer select-none">
-                  <h5>{g.label}</h5>
-                  <span className="filter-group__caret">▼</span>
-                </summary>
-                <div className="filter-group__items">
-                  {g.options.map((o) => {
+              <FilterGroup key={g.id} label={g.label} defaultOpen>
+                {g.options.length === 0 ? (
+                  <div className="text-xs text-n-400 py-2">Chưa có dữ liệu</div>
+                ) : (
+                  g.options.map((o) => {
                     const checked = selected.includes(o.v);
                     const next = toggledList(selected, o.v);
                     const href = buildHref(searchParams, { [g.id]: next, page: undefined });
@@ -129,55 +166,40 @@ export default function ProductsPage({ searchParams = {} }: { searchParams?: Raw
                       <Link
                         key={o.v}
                         href={href}
-                        className="flex items-center justify-between py-1.5 cursor-pointer select-none group"
+                        className="flex items-start justify-between gap-2 py-1.5 cursor-pointer select-none group"
                       >
                         <span
                           className={
-                            "flex items-center gap-2 text-[13px] " +
+                            "flex items-start gap-2 text-[13px] leading-[1.35] min-w-0 " +
                             (checked
                               ? "text-n-900 font-semibold"
                               : "text-n-700 group-hover:text-n-900")
                           }
                         >
-                          <span
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            readOnly
+                            tabIndex={-1}
                             aria-hidden="true"
-                            className={
-                              "inline-flex items-center justify-center w-4 h-4 rounded-[3px] border " +
-                              (checked
-                                ? "bg-accent border-accent text-white"
-                                : "bg-white border-n-300")
-                            }
-                          >
-                            {checked ? "✓" : ""}
-                          </span>
-                          {o.l}
+                            className="h-4 w-4 mt-0.5 rounded-[3px] border border-n-300 accent-accent pointer-events-none shrink-0"
+                          />
+                          <span className="min-w-0 wrap-break-word">{o.l}</span>
                         </span>
-                        <span className="text-xs text-n-400">({o.c})</span>
+                        <span className="text-xs text-n-400 mt-0.5 shrink-0">({o.c})</span>
                       </Link>
                     );
-                  })}
-                </div>
-              </details>
+                  })
+                )}
+              </FilterGroup>
             );
           })}
-
-          <details open className="filter-group">
-            <summary className="filter-group__head list-none cursor-pointer select-none">
-              <h5>Thương hiệu</h5>
-              <span className="filter-group__caret">▼</span>
-            </summary>
-            <div className="filter-group__items">
-              <BrandCheck label="MÜNZING" count={48} checked />
-              <BrandCheck label="AddWorks" count={8} />
-              <BrandCheck label="Khác" count={4} />
-            </div>
-          </details>
         </aside>
 
         <div>
           <div className="toolbar">
             <div className="toolbar__left">
-              <span className="toolbar__count">{filtered.length} sản phẩm</span>
+              <span className="toolbar__count">{total} sản phẩm</span>
               <div className="toolbar__chips">
                 {CHIPS.map((c) => {
                   const isActive = c === chip;
@@ -190,6 +212,7 @@ export default function ProductsPage({ searchParams = {} }: { searchParams?: Raw
                       key={c}
                       href={href}
                       className={`chip-btn${isActive ? " active" : ""}`}
+                      style={isActive ? { color: "#fff" } : undefined}
                     >
                       {c}
                     </Link>
@@ -204,70 +227,105 @@ export default function ProductsPage({ searchParams = {} }: { searchParams?: Raw
           </div>
 
           <div className="product-grid product-grid--3">
-            {filtered.map((p) => (
-              <Link key={p.id} href={`/products/${p.id}`} className="prod-card">
-                <div className="prod-card__media"><ProductImage name={p.name} /></div>
-                <div className="prod-card__body">
-                  <Tag variant="brand">{p.group}</Tag>
-                  <h3 className="prod-card__name">{p.name}</h3>
-                  <p className="prod-card__desc">{p.desc}</p>
-                  <div className="prod-card__foot">
-                    <span className="prod-card__cta">Xem chi tiết →</span>
-                    <span className="prod-card__compare">+ Compare</span>
+            {products.length === 0 ? (
+              <div className="col-span-full text-n-500 py-12 text-center">
+                Không tìm thấy sản phẩm phù hợp với bộ lọc.
+              </div>
+            ) : (
+              products.map((p) => (
+                <Link key={p.id} href={`/products/${p.slug}`} className="prod-card">
+                  <div className="prod-card__media">
+                    <ProductImage name={p.name} src={publicAssetUrl(PRODUCT_BUCKET, p.main_image_path)} />
                   </div>
-                </div>
-              </Link>
-            ))}
+                  <div className="prod-card__body">
+                    {p.brand && <Tag variant="brand">{p.brand}</Tag>}
+                    <h3 className="prod-card__name">{p.name}</h3>
+                    <p className="prod-card__desc">{p.short_description ?? ""}</p>
+                    <div className="prod-card__foot">
+                      <span className="prod-card__cta">Xem chi tiết →</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
 
-          <div className="pagination">
-            {([1, 2, 3, "...", 8] as const).map((n, i) => {
-              if (typeof n !== "number") {
-                return <span key={i} className="pg pointer-events-none">{n}</span>;
-              }
-              const isActive = n === pageNum;
-              const href = buildHref(searchParams, { page: n === 1 ? undefined : String(n) });
-              return (
-                <Link key={i} href={href} className={`pg${isActive ? " active" : ""}`}>
-                  {n}
-                </Link>
-              );
-            })}
-            <Link
-              href={buildHref(searchParams, { page: String(pageNum + 1) })}
-              className="pg"
-            >
-              ›
-            </Link>
-          </div>
+          <Pagination
+            total={total}
+            pageSize={24}
+            current={pageNum}
+            hrefFor={(n) =>
+              buildHref(searchParams, { page: n === 1 ? undefined : String(n) })
+            }
+          />
         </div>
       </div>
     </>
   );
 }
 
-function BrandCheck({ label, count, checked }: { label: string; count: number; checked?: boolean }) {
+function pageWindow(current: number, last: number): Array<number | "..."> {
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
+  const out: Array<number | "..."> = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(last - 1, current + 1);
+  if (start > 2) out.push("...");
+  for (let i = start; i <= end; i += 1) out.push(i);
+  if (end < last - 1) out.push("...");
+  out.push(last);
+  return out;
+}
+
+function Pagination({
+  total,
+  pageSize,
+  current,
+  hrefFor,
+}: {
+  total: number;
+  pageSize: number;
+  current: number;
+  hrefFor: (n: number) => string;
+}) {
+  const last = Math.max(1, Math.ceil(total / pageSize));
+  if (last <= 1) return null;
+
+  const from = (current - 1) * pageSize + 1;
+  const to = Math.min(current * pageSize, total);
+  const items = pageWindow(current, last);
+
   return (
-    <div className="flex items-center justify-between py-1.5 select-none">
-      <span
-        className={
-          "flex items-center gap-2 text-[13px] " +
-          (checked ? "text-n-900 font-semibold" : "text-n-700")
-        }
-      >
-        <span
-          aria-hidden="true"
-          className={
-            "inline-flex items-center justify-center w-4 h-4 rounded-[3px] border " +
-            (checked ? "bg-accent border-accent text-white" : "bg-white border-n-300")
-          }
-        >
-          {checked ? "✓" : ""}
-        </span>
-        {label}
-      </span>
-      <span className="text-xs text-n-400">({count})</span>
+    <div className="flex items-center justify-between mt-8">
+      <div className="text-xs text-n-500">
+        {from}–{to} / {total} sản phẩm
+      </div>
+      <div className="pagination">
+        {current > 1 ? (
+          <Link href={hrefFor(current - 1)} className="pg" aria-label="Trang trước">‹</Link>
+        ) : (
+          <span className="pg pointer-events-none opacity-40" aria-hidden="true">‹</span>
+        )}
+
+        {items.map((it, i) =>
+          typeof it === "number" ? (
+            <Link
+              key={`p-${it}`}
+              href={hrefFor(it)}
+              className={`pg${it === current ? " active" : ""}`}
+            >
+              {it}
+            </Link>
+          ) : (
+            <span key={`d-${i}`} className="pg pointer-events-none">…</span>
+          ),
+        )}
+
+        {current < last ? (
+          <Link href={hrefFor(current + 1)} className="pg" aria-label="Trang sau">›</Link>
+        ) : (
+          <span className="pg pointer-events-none opacity-40" aria-hidden="true">›</span>
+        )}
+      </div>
     </div>
   );
 }
-

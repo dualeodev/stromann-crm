@@ -15,7 +15,9 @@ function isActive(pathname: string, id: AdminPageId): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function Sidebar() {
+export type SidebarCounts = Partial<Record<AdminPageId, number>>;
+
+export function Sidebar({ counts }: { counts?: SidebarCounts } = {}) {
   const pathname = usePathname() ?? "/admin";
 
   return (
@@ -33,19 +35,24 @@ export function Sidebar() {
             {item.group}
           </div>
         ) : (
-          <Link
-            key={item.id}
-            href={hrefFor(item.id)}
-            className={`sb__item ${isActive(pathname, item.id) ? "active" : ""}`}
-          >
-            <span className="sb__icon"><item.icon size={18} strokeWidth={1.75} /></span>
-            <span>{item.label}</span>
-            {item.count != null && (
-              <span className={`sb__count ${item.hot ? "sb__count--hot" : ""}`}>
-                {item.count}
-              </span>
-            )}
-          </Link>
+          (() => {
+            const count = counts?.[item.id] ?? item.count;
+            return (
+              <Link
+                key={item.id}
+                href={hrefFor(item.id)}
+                className={`sb__item ${isActive(pathname, item.id) ? "active" : ""}`}
+              >
+                <span className="sb__icon"><item.icon size={18} strokeWidth={1.75} /></span>
+                <span>{item.label}</span>
+                {count != null && (
+                  <span className={`sb__count ${item.hot ? "sb__count--hot" : ""}`}>
+                    {count}
+                  </span>
+                )}
+              </Link>
+            );
+          })()
         ),
       )}
     </aside>

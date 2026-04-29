@@ -13,6 +13,7 @@ export type AdminPageId =
   | "notifications"
   | "submissions"
   | "banners"
+  | "categories"
   | "products"
   | "industries"
   | "tech"

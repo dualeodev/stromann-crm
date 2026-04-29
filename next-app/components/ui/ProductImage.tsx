@@ -3,9 +3,21 @@ import { Placeholder } from "./Placeholder";
 export interface ProductImageProps {
   name?: string;
   dark?: boolean;
+  src?: string | null;
 }
 
-export function ProductImage({ name, dark }: ProductImageProps) {
+export function ProductImage({ name, dark, src }: ProductImageProps) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={name ?? "Product"}
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+    );
+  }
   return (
     <Placeholder variant={dark ? "dark" : "brand"} className="w-full h-full">
       <svg

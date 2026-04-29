@@ -21,16 +21,21 @@ export function bannerImageUrl(image_path: string | null | undefined): string | 
   return `${base}/storage/v1/object/public/${BANNER_BUCKET}/${image_path}`;
 }
 
-export async function listBanners(): Promise<BannerRow[]> {
+export async function listBannersPaged(opts: {
+  page: number;
+  pageSize: number;
+}): Promise<{ rows: BannerRow[]; total: number }> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const from = (opts.page - 1) * opts.pageSize;
+  const { data, error, count } = await supabase
     .from("banners")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("position", { ascending: true })
     .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, from + opts.pageSize - 1);
   if (error) throw error;
-  return data as BannerRow[];
+  return { rows: (data ?? []) as BannerRow[], total: count ?? 0 };
 }
 
 export async function getBanner(id: string): Promise<BannerRow | null> {
