@@ -1,12 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Camera,
+  Eye,
+  FileVideo,
+  Image as ImageIcon,
+  Link2,
+  Newspaper,
+  Paperclip,
+  Table as TableIcon,
+} from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { LangTabs, type Lang } from "@/components/admin/forms/LangTabs";
 import { Pill } from "@/components/admin/atoms/Pill";
 import { showToast } from "@/lib/admin/showToast";
+
+const INSERT_BUTTONS: Array<{ key: string; el: ReactNode }> = [
+  { key: "link",  el: <><Link2 size={12} /> Link</> },
+  { key: "img",   el: <><ImageIcon size={12} /> Ảnh</> },
+  { key: "video", el: <><FileVideo size={12} /> Video</> },
+  { key: "table", el: <><TableIcon size={12} /> Bảng</> },
+  { key: "file",  el: <><Paperclip size={12} /> File</> },
+];
 
 export default function NewsDetailAdminPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -29,17 +47,19 @@ export default function NewsDetailAdminPage({ params }: { params: { id: string }
         badge={!isNew ? <Pill status="published" /> : undefined}
         actions={
           <>
-            <button type="button" className="btn btn--secondary">👁 Xem trước</button>
+            <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+              <Eye size={14} /> Xem trước
+            </button>
             <button type="button" className="btn btn--ghost">Lưu nháp</button>
             <button
               type="button"
-              className="btn btn--primary"
+              className="btn btn--primary inline-flex items-center gap-1.5"
               onClick={() => {
                 showToast("Đã xuất bản bài viết");
                 back();
               }}
             >
-              📰 Xuất bản
+              <Newspaper size={14} /> Xuất bản
             </button>
           </>
         }
@@ -64,14 +84,14 @@ export default function NewsDetailAdminPage({ params }: { params: { id: string }
             <div className="field">
               <label>Ảnh đại diện (1200×630)</label>
               <div
-                className="border border-n-200 rounded-lg flex items-center justify-center text-n-500 text-[13px]"
+                className="border border-n-200 rounded-lg flex items-center justify-center gap-1.5 text-n-500 text-[13px]"
                 style={{
                   aspectRatio: "1200/630",
                   background:
                     "repeating-linear-gradient(45deg, #FFE4E6 0 8px, #fff 8px 16px)",
                 }}
               >
-                📷 Chọn ảnh đại diện
+                <Camera size={14} /> Chọn ảnh đại diện
               </div>
             </div>
             <div className="field">
@@ -108,9 +128,13 @@ export default function NewsDetailAdminPage({ params }: { params: { id: string }
                     </button>
                   ))}
                   <span className="w-px bg-n-200 mx-1"></span>
-                  {["🔗 Link", "📷 Ảnh", "🎬 Video", "📊 Bảng", "📎 File"].map((t) => (
-                    <button key={t} type="button" className="px-2.5 py-1 text-xs font-semibold text-n-700 rounded">
-                      {t}
+                  {INSERT_BUTTONS.map((b) => (
+                    <button
+                      key={b.key}
+                      type="button"
+                      className="px-2.5 py-1 text-xs font-semibold text-n-700 rounded inline-flex items-center gap-1"
+                    >
+                      {b.el}
                     </button>
                   ))}
                 </div>
@@ -135,7 +159,7 @@ export default function NewsDetailAdminPage({ params }: { params: { id: string }
                       borderLeft: "3px solid var(--brand-500)",
                     }}
                   >
-                    💡 <b>Mẹo từ chuyên gia:</b> Luôn test ở cả 2 mức liều — khuyến nghị và 1.5× để xác định "vùng an toàn".
+                    <b>Mẹo từ chuyên gia:</b> Luôn test ở cả 2 mức liều — khuyến nghị và 1.5× để xác định "vùng an toàn".
                   </p>
                   <h2>3. Tương thích với các phụ gia khác</h2>
                   <p>
@@ -163,7 +187,7 @@ export default function NewsDetailAdminPage({ params }: { params: { id: string }
               <textarea className="input" rows={2} />
             </div>
             <div className="p-3 bg-n-50 rounded-lg">
-              <div className="text-[11px] text-n-500 mb-2">👁 Xem trước Google</div>
+              <div className="text-[11px] text-n-500 mb-2 inline-flex items-center gap-1"><Eye size={11} /> Xem trước Google</div>
               <div className="text-lg" style={{ color: "#1a0dab" }}>
                 5 lưu ý chọn defoamer cho sơn nước hệ acrylic
               </div>

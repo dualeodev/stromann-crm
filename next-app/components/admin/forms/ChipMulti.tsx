@@ -1,5 +1,7 @@
 "use client";
 
+import { Check } from "lucide-react";
+
 export function ChipMulti({
   options,
   selected,
@@ -23,13 +25,13 @@ export function ChipMulti({
             type="button"
             onClick={() => toggle(o)}
             className={
-              "px-3 py-1.5 text-xs font-semibold rounded-full border " +
+              "px-3 py-1.5 text-xs font-semibold rounded-full border inline-flex items-center gap-1 " +
               (on
                 ? "border-brand-500 bg-[#FFE4E6] text-brand-700"
                 : "border-n-300 bg-white text-n-700")
             }
           >
-            {on && "✓ "}
+            {on && <Check size={12} strokeWidth={2.5} />}
             {o}
           </button>
         );

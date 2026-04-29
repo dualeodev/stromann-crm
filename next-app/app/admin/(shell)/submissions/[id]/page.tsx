@@ -1,12 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Ban,
+  Camera,
+  ClipboardList,
+  Download,
+  DollarSign,
+  FlaskConical,
+  Mail,
+  MailCheck,
+  Paperclip,
+  Phone,
+  PhoneCall,
+  Link2,
+  CheckCircle2,
+  Users,
+} from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { Pill } from "@/components/admin/atoms/Pill";
 import { showToast } from "@/lib/admin/showToast";
 import type { SubmissionStatus } from "@/lib/admin/types";
+
+const QUICK_REPLIES: Array<{ key: string; el: ReactNode }> = [
+  { key: "email",   el: <><Mail size={11} /> Email báo giá</> },
+  { key: "called",  el: <><PhoneCall size={11} /> Đã gọi xác nhận</> },
+  { key: "more",    el: <><ClipboardList size={11} /> Yêu cầu thêm thông tin</> },
+  { key: "done",    el: <><CheckCircle2 size={11} /> Hoàn tất giao dịch</> },
+];
+
+const REPLY_TOOLBAR: Array<{ key: string; el: ReactNode }> = [
+  { key: "b",     el: <b>B</b> },
+  { key: "i",     el: <i>I</i> },
+  { key: "u",     el: <u>U</u> },
+  { key: "link",  el: <Link2 size={12} /> },
+  { key: "img",   el: <Camera size={12} /> },
+  { key: "file",  el: <Paperclip size={12} /> },
+  { key: "table", el: <><DollarSign size={12} /> Bảng giá</> },
+];
 
 interface CustomerField {
   lbl: string;
@@ -63,8 +96,12 @@ export default function SubmissionDetailPage({ params }: { params: { id: string 
         badge={<Pill status={status} />}
         actions={
           <>
-            <button type="button" className="btn btn--secondary">📞 Gọi ngay</button>
-            <button type="button" className="btn btn--secondary">⤓ Xuất PDF</button>
+            <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+              <Phone size={14} /> Gọi ngay
+            </button>
+            <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+              <Download size={14} /> Xuất PDF
+            </button>
             <button
               type="button"
               className="btn btn--primary"
@@ -168,19 +205,25 @@ export default function SubmissionDetailPage({ params }: { params: { id: string 
 
           <FormSection title="Phản hồi khách">
             <div className="flex gap-1.5 mb-2 flex-wrap">
-              {["📧 Email báo giá", "📞 Đã gọi xác nhận", "📋 Yêu cầu thêm thông tin", "✅ Hoàn tất giao dịch"].map((t) => (
-                <button key={t} type="button" className="chip text-[11px]">{t}</button>
+              {QUICK_REPLIES.map((q) => (
+                <button
+                  key={q.key}
+                  type="button"
+                  className="chip text-[11px] inline-flex items-center gap-1"
+                >
+                  {q.el}
+                </button>
               ))}
             </div>
             <div className="border border-n-300 rounded-lg overflow-hidden">
-              <div className="p-1.5 bg-n-50 border-b border-n-200 flex gap-0.5">
-                {["B", "I", "U", "🔗", "📷", "📎", "💰 Bảng giá"].map((t) => (
+              <div className="p-1.5 bg-n-50 border-b border-n-200 flex gap-0.5 items-center">
+                {REPLY_TOOLBAR.map((b) => (
                   <button
-                    key={t}
+                    key={b.key}
                     type="button"
-                    className="px-2 py-1 text-[11px] font-semibold text-n-700 rounded"
+                    className="px-2 py-1 text-[11px] font-semibold text-n-700 rounded inline-flex items-center gap-1"
                   >
-                    {t}
+                    {b.el}
                   </button>
                 ))}
               </div>
@@ -292,10 +335,18 @@ export default function SubmissionDetailPage({ params }: { params: { id: string 
           <div className="card">
             <div className="card__head"><h3>Hành động nhanh</h3></div>
             <div className="card__body flex flex-col gap-1.5">
-              <button type="button" className="btn btn--secondary justify-start">📋 Tạo báo giá chính thức</button>
-              <button type="button" className="btn btn--secondary justify-start">🧪 Tạo phiếu gửi mẫu thử</button>
-              <button type="button" className="btn btn--secondary justify-start">👥 Chuyển sang Tech</button>
-              <button type="button" className="btn btn--secondary justify-start">🚫 Đánh dấu spam</button>
+              <button type="button" className="btn btn--secondary justify-start inline-flex items-center gap-1.5">
+                <ClipboardList size={14} /> Tạo báo giá chính thức
+              </button>
+              <button type="button" className="btn btn--secondary justify-start inline-flex items-center gap-1.5">
+                <FlaskConical size={14} /> Tạo phiếu gửi mẫu thử
+              </button>
+              <button type="button" className="btn btn--secondary justify-start inline-flex items-center gap-1.5">
+                <Users size={14} /> Chuyển sang Tech
+              </button>
+              <button type="button" className="btn btn--secondary justify-start inline-flex items-center gap-1.5">
+                <Ban size={14} /> Đánh dấu spam
+              </button>
             </div>
           </div>
         </div>

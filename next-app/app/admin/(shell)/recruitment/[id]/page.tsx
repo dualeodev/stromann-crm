@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FileText } from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { Pill } from "@/components/admin/atoms/Pill";
@@ -262,7 +263,9 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
                   </td>
                   <td><span className="text-xs">{a.exp}</span></td>
                   <td>
-                    <a className="text-brand-500 text-xs font-semibold">📄 CV.pdf</a>
+                    <a className="text-brand-500 text-xs font-semibold inline-flex items-center gap-1">
+                      <FileText size={12} /> CV.pdf
+                    </a>
                   </td>
                   <td><Pill status={a.status} /></td>
                   <td><span className="text-xs">{a.date}</span></td>

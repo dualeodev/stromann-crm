@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ChevronDown, Plus, Search, Upload } from "lucide-react";
 import { ADMIN_PRODUCTS } from "@/lib/admin/data";
 import { Pill } from "@/components/admin/atoms/Pill";
 import { LangChip } from "@/components/admin/atoms/LangChip";
@@ -22,9 +23,11 @@ export default function ProductsAdminPage() {
           <p>72 sản phẩm — phân theo nhóm chức năng, ngành ứng dụng, vấn đề kỹ thuật và thương hiệu.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" className="btn btn--secondary">⤴ Import CSV</button>
-          <Link href="/admin/products/new" className="btn btn--primary">
-            + Thêm sản phẩm
+          <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+            <Upload size={14} /> Import CSV
+          </button>
+          <Link href="/admin/products/new" className="btn btn--primary inline-flex items-center gap-1.5">
+            <Plus size={14} /> Thêm sản phẩm
           </Link>
         </div>
       </div>
@@ -32,7 +35,7 @@ export default function ProductsAdminPage() {
       <div className="card">
         <div className="card__head">
           <div className="searchbar bg-[#F4F4F5] max-w-[300px]">
-            <span>🔍</span>
+            <Search size={14} className="text-n-500" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -40,9 +43,15 @@ export default function ProductsAdminPage() {
             />
           </div>
           <div className="flex gap-2">
-            <button type="button" className="btn btn--ghost btn--sm">Tất cả nhóm ▾</button>
-            <button type="button" className="btn btn--ghost btn--sm">Tất cả ngành ▾</button>
-            <button type="button" className="btn btn--ghost btn--sm">Trạng thái ▾</button>
+            <button type="button" className="btn btn--ghost btn--sm inline-flex items-center gap-1">
+              Tất cả nhóm <ChevronDown size={12} />
+            </button>
+            <button type="button" className="btn btn--ghost btn--sm inline-flex items-center gap-1">
+              Tất cả ngành <ChevronDown size={12} />
+            </button>
+            <button type="button" className="btn btn--ghost btn--sm inline-flex items-center gap-1">
+              Trạng thái <ChevronDown size={12} />
+            </button>
           </div>
         </div>
         <table className="tbl">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Check, ChevronRight, X } from "lucide-react";
 import { showToast } from "@/lib/admin/showToast";
 import { NOTIFICATIONS } from "@/lib/admin/data";
 import type { AdminNotification, NotifTarget } from "@/lib/admin/types";
@@ -17,15 +18,18 @@ function NotifRow({
   n: AdminNotification;
   onNavigate: () => void;
 }) {
+  const Icon = n.icon;
   const body = (
     <>
-      <div className={`notif__icon ${n.type}`}>{n.icon}</div>
+      <div className={`notif__icon ${n.type}`}><Icon size={18} strokeWidth={2} /></div>
       <div className="notif__body">
         <div className="notif__title">{n.title}</div>
         <div className="notif__sub">{n.sub}</div>
         <div className="notif__time">{n.time}</div>
       </div>
-      <div className="flex items-center text-n-400 text-base">›</div>
+      <div className="flex items-center text-n-400">
+        <ChevronRight size={16} />
+      </div>
     </>
   );
 
@@ -62,8 +66,8 @@ export function NotifDrawer({
       <div className={`drawer ${open ? "open" : ""}`}>
         <div className="drawer__head">
           <h3>Thông báo</h3>
-          <button type="button" className="btn btn--ghost btn--sm" onClick={onClose}>
-            ✕
+          <button type="button" className="btn btn--ghost btn--sm" onClick={onClose} aria-label="Đóng">
+            <X size={16} />
           </button>
         </div>
         <div className="drawer__filter">
@@ -82,8 +86,12 @@ export function NotifDrawer({
             Chưa đọc ({unreadCount})
           </button>
           <span className="flex-1"></span>
-          <button type="button" onClick={() => showToast("Đã đánh dấu đã đọc")}>
-            ✓ Tất cả
+          <button
+            type="button"
+            onClick={() => showToast("Đã đánh dấu đã đọc")}
+            className="inline-flex items-center gap-1"
+          >
+            <Check size={14} /> Tất cả
           </button>
         </div>
         <div className="drawer__list">

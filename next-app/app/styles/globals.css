@@ -606,7 +606,8 @@
   .stat--accent .stat__delta { color: rgba(255,255,255,0.9); }
 
   /* Cards (admin) */
-  .admin-root .card { background: #fff; border: 1px solid var(--n-200); border-radius: 12px; }
+  .admin-root .card { background: #fff; border: 1px solid var(--n-200); border-radius: 12px; overflow: hidden; transition: none; }
+  .admin-root .card:hover { border-color: var(--n-200); box-shadow: none; transform: none; }
   .admin-root .card__head { padding: 16px 20px; border-bottom: 1px solid var(--n-200); display: flex; align-items: center; justify-content: space-between; }
   .admin-root .card__head h3 { margin: 0; font-size: 15px; font-weight: 700; }
   .admin-root .card__body { padding: 16px 20px; }
@@ -634,18 +635,16 @@
   .tbl { width: 100%; border-collapse: collapse; }
   .tbl th { text-align: left; font-size: 11px; font-weight: 700; color: var(--n-500); letter-spacing: 0.06em; text-transform: uppercase; padding: 12px 16px; background: #FAFAFA; border-bottom: 1px solid var(--n-200); }
   .tbl td { padding: 14px 16px; border-bottom: 1px solid var(--n-100); font-size: 13px; vertical-align: middle; }
-  .tbl tr:hover td { background: #FAFAFA; }
   .tbl__id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--n-500); }
   .tbl__name { font-weight: 600; color: var(--n-900); }
   .tbl__sub { font-size: 12px; color: var(--n-500); margin-top: 2px; }
-  .tbl__actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
-  .tbl tr:hover .tbl__actions { opacity: 1; }
+  .tbl__actions { display: flex; gap: 4px; }
   .tbl__act { width: 28px; height: 28px; border-radius: 6px; color: var(--n-500); display: inline-flex; align-items: center; justify-content: center; }
   .tbl__act:hover { background: var(--n-100); color: var(--n-900); }
   .tbl__act.danger:hover { background: #FEE2E2; color: #DC2626; }
 
   /* Pills/badges */
-  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
   .pill--success { background: #DCFCE7; color: #166534; }
   .pill--warn { background: #FEF3C7; color: #92400E; }
   .pill--info { background: #DBEAFE; color: #1E40AF; }
@@ -714,10 +713,37 @@
   .thumb--brand { background: repeating-linear-gradient(45deg, #FFE4E6 0 8px, #fff 8px 16px); }
 
   /* Toggle */
-  .toggle { display: inline-block; width: 32px; height: 18px; background: var(--n-300); border-radius: 999px; position: relative; cursor: pointer; transition: background .15s; }
-  .toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform .15s; }
-  .toggle.on { background: var(--brand-500); }
-  .toggle.on::after { transform: translateX(14px); }
+  .toggle {
+    display: inline-block !important;
+    width: 36px !important;
+    height: 20px !important;
+    background-color: #A1A1AA !important;
+    border: 1px solid #A1A1AA !important;
+    border-radius: 999px !important;
+    position: relative !important;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s;
+    vertical-align: middle;
+    padding: 0 !important;
+    box-sizing: border-box;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform .15s;
+  }
+  .toggle:hover { background-color: #71717A !important; border-color: #71717A !important; }
+  .toggle.on { background-color: #E11D2C !important; border-color: #E11D2C !important; }
+  .toggle.on:hover { background-color: #BC1320 !important; border-color: #BC1320 !important; }
+  .toggle.on::after { transform: translateX(16px); }
+  .toggle:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .empty { text-align: center; padding: 40px; color: var(--n-500); font-size: 13px; }
 
