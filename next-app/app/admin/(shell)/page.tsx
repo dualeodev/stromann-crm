@@ -30,7 +30,7 @@ export default function DashboardPage() {
       <div className="page-h">
         <div>
           <div className="crumb">Tổng quan / <span>Dashboard</span></div>
-          <h1>Chào buổi chiều, Văn A 👋</h1>
+          <h1>Chào bạn 👋</h1>
           <p>Đây là tổng quan hoạt động website Stromann hôm nay.</p>
         </div>
         <div className="flex gap-2">

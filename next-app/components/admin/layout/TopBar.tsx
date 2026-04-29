@@ -1,6 +1,28 @@
 "use client";
 
-export function TopBar({ onOpenDrawer }: { onOpenDrawer: () => void }) {
+import { logoutAction } from "@/app/admin/login/actions";
+import type { AdminUser } from "@/lib/admin/types";
+
+const ROLE_LABEL: Record<AdminUser["role"], string> = {
+  super_admin: "Super Admin",
+  editor: "Editor",
+  viewer: "Viewer",
+};
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase() || "?";
+}
+
+export function TopBar({
+  user,
+  onOpenDrawer,
+}: {
+  user: AdminUser;
+  onOpenDrawer: () => void;
+}) {
   return (
     <div className="topbar">
       <div className="searchbar">
@@ -19,12 +41,17 @@ export function TopBar({ onOpenDrawer }: { onOpenDrawer: () => void }) {
           ↗
         </a>
         <div className="tb__user">
-          <div className="tb__avatar">VA</div>
+          <div className="tb__avatar">{initials(user.full_name)}</div>
           <div>
-            <div className="text-xs font-bold">Văn A</div>
-            <div className="tb__role">Super Admin</div>
+            <div className="text-xs font-bold">{user.full_name}</div>
+            <div className="tb__role">{ROLE_LABEL[user.role]}</div>
           </div>
         </div>
+        <form action={logoutAction}>
+          <button type="submit" className="tb__btn" title="Đăng xuất">
+            ⏻
+          </button>
+        </form>
       </div>
     </div>
   );
