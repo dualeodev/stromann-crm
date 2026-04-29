@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/admin/layout/Sidebar";
 import { AdminShell } from "@/components/admin/layout/AdminShell";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminNavCounts } from "@/lib/catalog";
 
 export default async function ShellLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -21,9 +22,11 @@ export default async function ShellLayout({ children }: { children: ReactNode })
     redirect("/admin/login?error=no_profile");
   }
 
+  const navCounts = await getAdminNavCounts();
+
   return (
     <div className="admin-root app" style={{ background: "#F5F6F8" }}>
-      <Sidebar />
+      <Sidebar counts={navCounts} />
       <AdminShell user={profile}>{children}</AdminShell>
     </div>
   );

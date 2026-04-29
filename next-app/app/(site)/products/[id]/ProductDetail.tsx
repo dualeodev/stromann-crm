@@ -4,8 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { Tag, Btn, ProductImage } from "@/components/ui";
 import Breadcrumb from "@/components/Breadcrumb";
-import { PRODUCTS } from "@/lib/data";
-import type { Product } from "@/lib/types";
+import type { ProductRow, ProductWithRelations } from "@/lib/catalog";
+
+function publicAssetUrl(bucket: string, path: string | null | undefined): string | null {
+  if (!path) return null;
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  return `${base}/storage/v1/object/public/${bucket}/${path}`;
+}
 
 type TabKey = "desc" | "app" | "spec" | "doc";
 
@@ -16,86 +21,117 @@ const TABS: Array<[TabKey, string]> = [
   ["doc",  "Tài liệu kỹ thuật"],
 ];
 
-const META: Array<[string, string]> = [
-  ["Loại", "Defoamer không silicon"],
-  ["Liều dùng khuyến nghị", "0.1 – 0.5% trên tổng công thức"],
-  ["Đóng gói", "Can 25 kg / Phuy 200 kg / IBC 1000 kg"],
-  ["Bảo quản", "Nơi khô ráo, 5°C – 35°C"],
-  ["Hạn sử dụng", "12 tháng kể từ ngày sản xuất"],
-  ["Mã hàng", "AGI-120-25"],
-];
-
-const SPEC: Array<[string, string]> = [
-  ["Trạng thái", "Lỏng, đục"],
-  ["Màu sắc", "Trắng ngà"],
-  ["Tỷ trọng (20°C)", "0.95 – 0.98 g/ml"],
-  ["Hàm lượng rắn", "100%"],
-  ["pH (10% trong nước)", "6 – 8"],
-  ["Hoạt chất", "Polyether-modified mineral oil"],
-  ["Điểm chớp cháy", "> 100°C"],
-];
-
-const DOCS: Array<{ name: string; meta: string }> = [
-  { name: "TDS — AGITAN® 120",                  meta: "PDF · 412 KB · Cập nhật 03/2026" },
-  { name: "MSDS — AGITAN® 120 (VN)",            meta: "PDF · 580 KB · Cập nhật 03/2026" },
-  { name: "MSDS — AGITAN® 120 (EN)",            meta: "PDF · 565 KB · Cập nhật 03/2026" },
-  { name: "Brochure — Defoamer cho sơn nước",   meta: "PDF · 2.4 MB" },
-  { name: "Hướng dẫn phối trộn",                meta: "PDF · 880 KB" },
-  { name: "Chứng nhận chất lượng",              meta: "PDF · 320 KB" },
-];
-
-export default function ProductDetail({ product: p }: { product: Product }) {
+export default function ProductDetail({
+  product: p,
+  related,
+}: {
+  product: ProductWithRelations;
+  related: ProductRow[];
+}) {
   const [thumb, setThumb] = useState(0);
   const [tab, setTab] = useState<TabKey>("desc");
+
+  const primaryCategory = p.categories[0];
+
+  const galleryAll: Array<string | null> = [
+    publicAssetUrl("product-images", p.main_image_path),
+    ...p.gallery_paths.map((path) => publicAssetUrl("product-images", path)),
+  ].filter((u): u is string => Boolean(u));
+  const activeImage = galleryAll[thumb] ?? null;
 
   return (
     <>
       <Breadcrumb
         items={[
           { label: "Sản phẩm", href: "/products" },
-          { label: p.group, href: `/products?g=${p.group.toLowerCase()}` },
+          ...(primaryCategory
+            ? [{ label: primaryCategory.name, href: `/products?g=${primaryCategory.slug}` }]
+            : []),
           { label: p.name },
         ]}
       />
 
       <section className="pd-hero">
         <div className="pd-gallery">
-          <div className="pd-gallery__main"><ProductImage name={p.name} /></div>
-          <div className="pd-gallery__thumbs">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`pd-gallery__thumb${thumb === i ? " active" : ""}`}
-                onClick={() => setThumb(i)}
-              >
-                <ProductImage name={`view ${i + 1}`} />
-              </div>
-            ))}
+          <div className="pd-gallery__main">
+            <ProductImage name={p.name} src={activeImage} />
           </div>
+          {galleryAll.length > 1 && (
+            <div className="pd-gallery__thumbs">
+              {galleryAll.map((url, i) => (
+                <div
+                  key={url ?? i}
+                  className={`pd-gallery__thumb${thumb === i ? " active" : ""}`}
+                  onClick={() => setThumb(i)}
+                >
+                  <ProductImage name={`${p.name} ${i + 1}`} src={url} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="pd-info">
           <div className="pd-info__top">
-            <Tag variant="brand">{p.group}</Tag>
-            <Tag variant="success">CÒN HÀNG</Tag>
-            <Tag variant="neutral">MÜNZING</Tag>
+            {primaryCategory && <Tag variant="brand">{primaryCategory.name}</Tag>}
+            {p.is_enabled && <Tag variant="success">CÒN HÀNG</Tag>}
+            {p.brand && <Tag variant="neutral">{p.brand}</Tag>}
           </div>
           <h1 className="pd-info__title m-0">{p.name}</h1>
-          <p className="pd-info__sub m-0">
-            Defoamer hiệu quả cao dành cho sơn nước hệ acrylic, sơn xây dựng và mực in flexo gốc nước. Kiểm soát bọt khí ổn định, không gây rạn màng, dễ phối trộn ở giai đoạn let-down.
-          </p>
+          {p.short_description && (
+            <p className="pd-info__sub m-0">{p.short_description}</p>
+          )}
           <div className="pd-info__ctas">
             <Btn variant="primary" size="lg" href="/quote">Yêu cầu báo giá</Btn>
             <Btn variant="secondary" size="lg">Yêu cầu mẫu thử</Btn>
-            <Btn variant="ghost" size="lg">↓ Tải MSDS</Btn>
+            {p.documents.find((d) => d.kind === "msds") && (
+              <Btn variant="ghost" size="lg" href={p.documents.find((d) => d.kind === "msds")!.url}>
+                ↓ Tải MSDS
+              </Btn>
+            )}
           </div>
-          <dl className="pd-info__meta">
-            {META.map(([k, v]) => (
-              <div className="pd-info__meta-row" key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-          </dl>
+
+          {(p.industries.length > 0 || p.technical_issues.length > 0) && (
+            <dl className="pd-info__meta">
+              {p.industries.length > 0 && (
+                <div className="pd-info__meta-row">
+                  <dt>Ngành ứng dụng</dt>
+                  <dd className="flex gap-1.5 flex-wrap">
+                    {p.industries.map((i) => (
+                      <Link
+                        key={i.id}
+                        href={`/products?i=${i.slug}`}
+                        className="text-[12px] px-2 py-0.5 bg-n-100 rounded hover:bg-n-200"
+                      >
+                        {i.name}
+                      </Link>
+                    ))}
+                  </dd>
+                </div>
+              )}
+              {p.technical_issues.length > 0 && (
+                <div className="pd-info__meta-row">
+                  <dt>Giải quyết</dt>
+                  <dd className="flex gap-1.5 flex-wrap">
+                    {p.technical_issues.map((t) => (
+                      <Link
+                        key={t.id}
+                        href={`/products?p=${t.slug}`}
+                        className="text-[12px] px-2 py-0.5 bg-n-100 rounded hover:bg-n-200"
+                      >
+                        {t.name}
+                      </Link>
+                    ))}
+                  </dd>
+                </div>
+              )}
+              {p.region && (
+                <div className="pd-info__meta-row">
+                  <dt>Khu vực</dt>
+                  <dd>{p.region}</dd>
+                </div>
+              )}
+            </dl>
+          )}
         </div>
       </section>
 
@@ -123,17 +159,9 @@ export default function ProductDetail({ product: p }: { product: Product }) {
           <div className="grid grid-cols-[1.4fr_1fr] gap-12">
             <div>
               <h3 className="text-[22px] mt-0">Mô tả sản phẩm</h3>
-              <p className="text-n-700 leading-[1.7]">
-                AGITAN® 120 là defoamer không silicon dạng nhũ tương dầu khoáng, được phát triển cho các hệ sơn nước có hàm lượng pigment cao. Sản phẩm cho hiệu quả khử bọt cao và khả năng kiểm soát bọt vi mô tốt trong cả khâu sản xuất lẫn thi công.
+              <p className="text-n-700 leading-[1.7] whitespace-pre-line">
+                {p.detailed_description ?? p.short_description ?? "—"}
               </p>
-              <h3 className="text-[22px] mt-8">Lợi ích chính</h3>
-              <ul className="pl-5 leading-[1.9] text-n-700">
-                <li>Hiệu quả khử bọt cao ngay ở liều thấp (0.1 – 0.3%)</li>
-                <li>Tương thích tốt với hầu hết hệ acrylic, styrene-acrylic, vinyl-acrylic</li>
-                <li>Không gây rạn màng (cratering), không ảnh hưởng đến độ bóng</li>
-                <li>Dễ phân tán, có thể thêm trực tiếp vào let-down</li>
-                <li>Đạt VOC thấp, phù hợp xu hướng sản phẩm xanh</li>
-              </ul>
             </div>
             <aside className="bg-white p-6 rounded-r-12 border border-n-200 h-fit">
               <h4 className="mt-0">Cần hỗ trợ chọn sản phẩm?</h4>
@@ -152,78 +180,76 @@ export default function ProductDetail({ product: p }: { product: Product }) {
         )}
 
         {tab === "app" && (
-          <table className="app-table">
-            <thead>
-              <tr>
-                <th>Hệ ứng dụng</th>
-                <th>Sơn nước</th>
-                <th>Sơn dầu</th>
-                <th>Mực in nước</th>
-                <th>Mực in dầu</th>
-                <th>Liều dùng</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Sơn xây dựng (acrylic)</td><td><span className="check">✓</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td>0.1 – 0.3%</td></tr>
-              <tr><td>Sơn công nghiệp 1K</td><td><span className="check">✓</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td>0.2 – 0.5%</td></tr>
-              <tr><td>Mực in flexo gốc nước</td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td><span className="check">✓</span></td><td><span className="dash">—</span></td><td>0.1 – 0.4%</td></tr>
-              <tr><td>Mực in gravure</td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td><span className="check">✓</span></td><td><span className="dash">—</span></td><td>0.2 – 0.5%</td></tr>
-              <tr><td>Keo dán gốc nước</td><td><span className="check">✓</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td><span className="dash">—</span></td><td>0.1 – 0.3%</td></tr>
-            </tbody>
-          </table>
+          <div className="text-n-600">
+            {p.industries.length === 0 ? (
+              <p>Chưa có thông tin ứng dụng cụ thể cho sản phẩm này.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {p.industries.map((i) => (
+                  <Link
+                    key={i.id}
+                    href={`/products?i=${i.slug}`}
+                    className="p-4 border border-n-200 rounded-r-8 hover:border-accent"
+                  >
+                    <div className="font-bold mb-1">{i.name}</div>
+                    {i.short_description && (
+                      <div className="text-xs text-n-600">{i.short_description}</div>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {tab === "spec" && (
-          <table className="app-table">
-            <tbody>
-              {SPEC.map(([k, v]) => (
-                <tr key={k}>
-                  <td className="bg-n-50 font-bold">{k}</td>
-                  <td colSpan={5}>{v}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="text-n-600">
+            <p>Thông số kỹ thuật chi tiết sẽ được cập nhật.</p>
+          </div>
         )}
 
         {tab === "doc" && (
           <div className="resource-grid">
-            {DOCS.map((r) => (
-              <a key={r.name} href="#" className="resource">
-                <div className="resource__icon">PDF</div>
-                <div className="resource__body">
-                  <div className="resource__title">{r.name}</div>
-                  <div className="resource__meta">{r.meta}</div>
-                </div>
-                <span className="resource__cta">Tải ↓</span>
-              </a>
-            ))}
+            {p.documents.length === 0 ? (
+              <p className="text-n-600">Chưa có tài liệu nào được đính kèm cho sản phẩm này.</p>
+            ) : (
+              p.documents.map((r) => (
+                <a key={r.url} href={r.url} className="resource">
+                  <div className="resource__icon">PDF</div>
+                  <div className="resource__body">
+                    <div className="resource__title">{r.label}</div>
+                    <div className="resource__meta">{r.kind.toUpperCase()}</div>
+                  </div>
+                  <span className="resource__cta">Tải ↓</span>
+                </a>
+              ))
+            )}
           </div>
         )}
       </section>
 
-      <section className="section">
-        <h3 className="text-2xl font-bold m-0 mb-6">Sản phẩm liên quan</h3>
-        <div className="product-grid">
-          {PRODUCTS.filter((x) => x.group === p.group && x.id !== p.id)
-            .slice(0, 4)
-            .map((rp) => (
-              <Link key={rp.id} href={`/products/${rp.id}`} className="prod-card">
+      {related.length > 0 && (
+        <section className="section">
+          <h3 className="text-2xl font-bold m-0 mb-6">Sản phẩm liên quan</h3>
+          <div className="product-grid">
+            {related.map((rp) => (
+              <Link key={rp.id} href={`/products/${rp.slug}`} className="prod-card">
                 <div className="prod-card__media">
                   <ProductImage name={rp.name} />
                 </div>
                 <div className="prod-card__body">
-                  <Tag variant="brand">{rp.group}</Tag>
+                  {rp.brand && <Tag variant="brand">{rp.brand}</Tag>}
                   <h3 className="prod-card__name">{rp.name}</h3>
-                  <p className="prod-card__desc">{rp.desc}</p>
+                  <p className="prod-card__desc">{rp.short_description ?? ""}</p>
                   <div className="prod-card__foot">
                     <span className="prod-card__cta">Xem chi tiết →</span>
                   </div>
                 </div>
               </Link>
             ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </>
   );
 }

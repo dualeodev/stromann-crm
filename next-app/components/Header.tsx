@@ -22,6 +22,25 @@ const NAV: NavItem[] = [
   { id: "contact",     label: "Liên hệ",        path: "/contact" },
 ];
 
+export interface MegaMenuLink {
+  slug: string;
+  name: string;
+  count?: number;
+}
+
+export interface MegaFeatured {
+  slug: string;
+  name: string;
+  short_description: string | null;
+}
+
+export interface MegaMenuData {
+  categories: MegaMenuLink[];
+  industries: MegaMenuLink[];
+  issues: MegaMenuLink[];
+  featured: MegaFeatured | null;
+}
+
 function isActive(pathname: string, path: string) {
   if (path === "/") return pathname === "/";
   return pathname.startsWith(path);
@@ -33,93 +52,77 @@ const utilityLinkCls =
 const megaColLinkCls =
   "block py-1.5 text-sm font-medium text-n-800 transition-[color,padding] duration-150 hover:text-accent hover:pl-1";
 
-function ProductMega({ onClose }: { onClose: () => void }) {
+function MegaCol({
+  label,
+  links,
+  paramKey,
+}: {
+  label: string;
+  links: MegaMenuLink[];
+  paramKey: "g" | "i" | "p";
+}) {
+  return (
+    <div>
+      <h5 className="text-[11px] font-bold tracking-[0.08em] uppercase text-n-500 m-0 mb-3.5">
+        {label}
+      </h5>
+      <ul className="list-none p-0 m-0 flex flex-col gap-2">
+        {links.length === 0 ? (
+          <li className="text-n-400 text-xs italic">Chưa có dữ liệu</li>
+        ) : (
+          links.map((l) => (
+            <li key={l.slug}>
+              <Link href={`/products?${paramKey}=${l.slug}`} className={megaColLinkCls}>
+                {l.name}
+                {l.count != null && (
+                  <span className="text-n-400 text-xs"> · {l.count}</span>
+                )}
+              </Link>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  );
+}
+
+function ProductMega({ data, onClose }: { data: MegaMenuData; onClose: () => void }) {
   return (
     <div
       onMouseLeave={onClose}
       className="absolute top-[calc(100%+1px)] left-0 right-0 bg-white border-t border-n-200 shadow-card-xl z-40 animate-megamenu"
     >
       <div className="grid grid-cols-[1fr_1fr_1fr_1.2fr] gap-12 px-20 py-10">
-        <div>
-          <h5 className="text-[11px] font-bold tracking-[0.08em] uppercase text-n-500 m-0 mb-3.5">
-            Theo nhóm
-          </h5>
-          <ul className="list-none p-0 m-0 flex flex-col gap-2">
-            <li>
-              <Link href="/products?g=defoamer" className={megaColLinkCls}>
-                Defoamer <span className="text-n-400 text-xs">· 22</span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/products?g=dispersant" className={megaColLinkCls}>
-                Dispersant <span className="text-n-400 text-xs">· 18</span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/products?g=wetting" className={megaColLinkCls}>
-                Wetting Agent <span className="text-n-400 text-xs">· 12</span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/products?g=rheology" className={megaColLinkCls}>
-                Rheology Modifier <span className="text-n-400 text-xs">· 9</span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/products?g=wax" className={megaColLinkCls}>
-                Wax Additives <span className="text-n-400 text-xs">· 7</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
+        <MegaCol label="Theo danh mục" links={data.categories} paramKey="g" />
+        <MegaCol label="Theo ngành"     links={data.industries} paramKey="i" />
+        <MegaCol label="Theo vấn đề"   links={data.issues}     paramKey="p" />
 
-        <div>
-          <h5 className="text-[11px] font-bold tracking-[0.08em] uppercase text-n-500 m-0 mb-3.5">
-            Theo ngành
-          </h5>
-          <ul className="list-none p-0 m-0 flex flex-col gap-2">
-            <li><Link href="/industries" className={megaColLinkCls}>Sơn (Coatings)</Link></li>
-            <li><Link href="/industries" className={megaColLinkCls}>Mực in (Printing Inks)</Link></li>
-            <li><Link href="/industries" className={megaColLinkCls}>Nhựa &amp; Masterbatch</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <h5 className="text-[11px] font-bold tracking-[0.08em] uppercase text-n-500 m-0 mb-3.5">
-            Theo vấn đề
-          </h5>
-          <ul className="list-none p-0 m-0 flex flex-col gap-2">
-            <li><Link href="/products?p=foam" className={megaColLinkCls}>Bọt khí</Link></li>
-            <li><Link href="/products?p=viscosity" className={megaColLinkCls}>Độ nhớt</Link></li>
-            <li><Link href="/products?p=surface" className={megaColLinkCls}>Bề mặt</Link></li>
-            <li><Link href="/products?p=color" className={megaColLinkCls}>Lên màu</Link></li>
-          </ul>
-        </div>
-
-        <div className="relative overflow-hidden bg-n-900 text-white rounded-r-12 p-6 flex flex-col gap-3">
-          <div className="absolute -top-10 -right-10 w-[140px] h-[140px] rounded-full bg-accent opacity-[0.18] blur-[10px] pointer-events-none" />
-          <div className="relative z-[2] flex flex-col gap-3">
-            <Tag variant="brand" className="self-start">SẢN PHẨM MỚI</Tag>
-            <div className="text-lg font-bold leading-tight">
-              AGITAN® thế hệ mới — đã có hàng tại Việt Nam
+        {data.featured ? (
+          <div className="relative overflow-hidden bg-n-900 text-white rounded-r-12 p-6 flex flex-col gap-3">
+            <div className="absolute -top-10 -right-10 w-[140px] h-[140px] rounded-full bg-accent opacity-[0.18] blur-[10px] pointer-events-none" />
+            <div className="relative z-[2] flex flex-col gap-3">
+              <Tag variant="brand" className="self-start">SẢN PHẨM NỔI BẬT</Tag>
+              <div className="text-lg font-bold leading-tight">{data.featured.name}</div>
+              {data.featured.short_description && (
+                <div className="text-[13px] text-n-400">{data.featured.short_description}</div>
+              )}
+              <Link
+                href={`/products/${data.featured.slug}`}
+                className="inline-flex items-center gap-1.5 text-white font-bold text-sm transition-[gap] duration-150 hover:gap-2.5"
+              >
+                Khám phá ngay →
+              </Link>
             </div>
-            <div className="text-[13px] text-n-400">
-              Hiệu quả khử bọt cao hơn 30%, không silicon.
-            </div>
-            <Link
-              href="/products/agitan-120"
-              className="inline-flex items-center gap-1.5 text-white font-bold text-sm transition-[gap] duration-150 hover:gap-2.5"
-            >
-              Khám phá ngay →
-            </Link>
           </div>
-        </div>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
   );
 }
 
-export default function Header() {
+export default function Header({ mega }: { mega: MegaMenuData }) {
   const pathname = usePathname();
   const [megaOpen, setMegaOpen] = useState(false);
   const [lang, setLang] = useState<"VN" | "EN" | "CN">("VN");
@@ -215,7 +218,7 @@ export default function Header() {
           </Link>
         </div>
 
-        {megaOpen && <ProductMega onClose={() => setMegaOpen(false)} />}
+        {megaOpen && <ProductMega data={mega} onClose={() => setMegaOpen(false)} />}
       </div>
     </div>
   );

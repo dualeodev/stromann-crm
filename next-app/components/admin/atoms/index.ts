@@ -7,6 +7,7 @@ export { Card } from "./Card";
 export { Alert, type AlertProps, type AlertVariant } from "./Alert";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { DataTable, type Column, type DataTableProps } from "./DataTable";
+export { Pagination, type PaginationProps } from "./Pagination";
 export { Pill } from "./Pill";
 export { LangChip } from "./LangChip";
 export { Toggle } from "./Toggle";

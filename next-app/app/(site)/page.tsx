@@ -1,7 +1,12 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Tag, Btn, SectHead, ProductImage, IndustryImage, LinkArrow } from "@/components/ui";
-import { INDUSTRIES, WHY_ROWS, PRODUCTS, NEWS } from "@/lib/data";
+import { WHY_ROWS, NEWS } from "@/lib/data";
+import {
+  countProductsPerIndustry,
+  listProductIndustries,
+  listProducts,
+} from "@/lib/catalog";
 import { listActiveBanners, bannerImageUrl } from "@/lib/admin/banners";
 import type { BannerRow } from "@/lib/admin/types";
 
@@ -86,8 +91,15 @@ function HomeHero({ banner }: { banner: BannerRow | null }) {
 const STAT_BAR_STYLE = (w: string): CSSProperties => ({ width: w });
 
 export default async function HomePage() {
-  const heroBanners = await listActiveBanners("hero_home");
+  const [heroBanners, homepageIndustries, indCounts, featured] = await Promise.all([
+    listActiveBanners("hero_home"),
+    listProductIndustries({ enabledOnly: true }),
+    countProductsPerIndustry(),
+    listProducts({ publishedOnly: true, featuredOnly: true, pageSize: 6, sort: "popular" }),
+  ]);
   const banner = heroBanners[0] ?? null;
+  const swatchIndustries = homepageIndustries.filter((i) => i.show_on_homepage).slice(0, 3);
+  const swatchSource = swatchIndustries.length > 0 ? swatchIndustries : homepageIndustries.slice(0, 3);
   return (
     <>
       <HomeHero banner={banner} />
@@ -115,52 +127,49 @@ export default async function HomePage() {
         </div>
 
         <div className="swatch-grid">
-          {INDUSTRIES.map((ind, i) => (
-            <Link
-              key={ind.id}
-              href="/industries"
-              className="swatch-card"
-              style={{ ["--sw" as string]: ind.swatch } as CSSProperties}
-            >
-              <div className="swatch-card__chip">
-                <div className="swatch-card__paint"></div>
-                <div className="swatch-card__brush"></div>
-                <div className="swatch-card__drip">
-                  <span></span><span></span><span></span>
-                </div>
-                <div className="swatch-card__index">N° 0{i + 1}</div>
-                <div className="swatch-card__paintname">{ind.paint}</div>
-              </div>
-
-              <div className="swatch-card__label">
-                <div className="swatch-card__row">
-                  <div className="swatch-card__code">{ind.code}</div>
-                  <div className="swatch-card__finish">{ind.finish}</div>
-                </div>
-                <h3 className="swatch-card__title">{ind.title}</h3>
-                <p className="swatch-card__desc">{ind.desc}</p>
-
-                <div className="swatch-card__hex">
-                  <span className="swatch-card__hex-dot"></span>
-                  HEX {ind.swatch.toUpperCase()}
-                  <span className="swatch-card__hex-sep">·</span>
-                  {ind.products} SKU
+          {swatchSource.map((ind, i) => {
+            const swatchHex = ind.hex_color ?? "#C8332D";
+            return (
+              <Link
+                key={ind.id}
+                href={`/products?i=${ind.slug}`}
+                className="swatch-card"
+                style={{ ["--sw" as string]: swatchHex } as CSSProperties}
+              >
+                <div className="swatch-card__chip">
+                  <div className="swatch-card__paint"></div>
+                  <div className="swatch-card__brush"></div>
+                  <div className="swatch-card__drip">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div className="swatch-card__index">N° 0{i + 1}</div>
+                  <div className="swatch-card__paintname">{ind.name}</div>
                 </div>
 
-                <div className="swatch-card__chips">
-                  {ind.chips.map((c) => (
-                    <span key={c} className="swatch-card__pill">{c}</span>
-                  ))}
+                <div className="swatch-card__label">
+                  <div className="swatch-card__row">
+                    <div className="swatch-card__code">{ind.code ?? ind.slug.toUpperCase()}</div>
+                    <div className="swatch-card__finish">PRODUCT INDUSTRY</div>
+                  </div>
+                  <h3 className="swatch-card__title">{ind.name}</h3>
+                  <p className="swatch-card__desc">{ind.short_description ?? ""}</p>
+
+                  <div className="swatch-card__hex">
+                    <span className="swatch-card__hex-dot"></span>
+                    HEX {swatchHex.toUpperCase()}
+                    <span className="swatch-card__hex-sep">·</span>
+                    {indCounts[ind.id] ?? 0} SKU
+                  </div>
+
+                  <div className="swatch-card__cta">
+                    Mở swatch ngành <span className="swatch-card__arrow">→</span>
+                  </div>
                 </div>
 
-                <div className="swatch-card__cta">
-                  Mở swatch ngành <span className="swatch-card__arrow">→</span>
-                </div>
-              </div>
-
-              <div className="swatch-card__perf">— Thử mẫu / yêu cầu báo giá</div>
-            </Link>
-          ))}
+                <div className="swatch-card__perf">— Thử mẫu / yêu cầu báo giá</div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -297,13 +306,13 @@ export default async function HomePage() {
           right={<LinkArrow href="/products">Xem tất cả sản phẩm</LinkArrow>}
         />
         <div className="product-grid mt-12">
-          {PRODUCTS.filter((p) => p.featured).map((p) => (
-            <Link key={p.id} href={`/products/${p.id}`} className="prod-card">
+          {featured.rows.map((p) => (
+            <Link key={p.id} href={`/products/${p.slug}`} className="prod-card">
               <div className="prod-card__media"><ProductImage name={p.name} /></div>
               <div className="prod-card__body">
-                <Tag variant="brand">{p.group}</Tag>
+                {p.brand && <Tag variant="brand">{p.brand}</Tag>}
                 <h3 className="prod-card__name">{p.name}</h3>
-                <p className="prod-card__desc">{p.desc}</p>
+                <p className="prod-card__desc">{p.short_description ?? ""}</p>
                 <div className="prod-card__foot">
                   <span className="prod-card__cta">Xem chi tiết →</span>
                   <span className="prod-card__compare">+ Compare</span>

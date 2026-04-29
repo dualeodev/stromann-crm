@@ -1,86 +1,111 @@
-"use client";
-
 import Link from "next/link";
-import { Pill } from "@/components/admin/atoms/Pill";
-import { Toggle } from "@/components/admin/atoms/Toggle";
-import { ActionRow } from "@/components/admin/atoms/ActionRow";
-import { showToast } from "@/lib/admin/showToast";
+import { ArrowRight, Factory, Pencil, Plus } from "lucide-react";
+import {
+  ButtonLink,
+  Card,
+  EmptyState,
+  Pagination,
+} from "@/components/admin/atoms";
+import { listProductIndustriesPaged, countProductsPerIndustry } from "@/lib/catalog";
+import { IndustryToggle } from "./IndustryToggle";
 
-interface Item {
-  id: number;
-  code: string;
-  name: string;
-  products: number;
-  articles: number;
-  visible: boolean;
-  default: boolean;
+const PAGE_SIZE = 20;
+
+function buildHref(base: string, page: number) {
+  return page === 1 ? base : `${base}?page=${page}`;
 }
 
-const ITEMS: Item[] = [
-  { id: 1, code: "S", name: "Sơn (Coatings)",          products: 28, articles: 7, visible: true,  default: true  },
-  { id: 2, code: "M", name: "Mực in (Printing Inks)",  products: 18, articles: 4, visible: true,  default: true  },
-  { id: 3, code: "N", name: "Nhựa & Masterbatch",      products: 12, articles: 3, visible: true,  default: true  },
-  { id: 4, code: "K", name: "Keo dán (Adhesives)",     products: 5,  articles: 0, visible: false, default: false },
-  { id: 5, code: "G", name: "Giấy (Paper Coatings)",   products: 0,  articles: 0, visible: false, default: false },
-];
+export default async function IndustriesAdminPage({
+  searchParams = {},
+}: {
+  searchParams?: { page?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page ?? 1));
+  const [{ rows: items, total }, counts] = await Promise.all([
+    listProductIndustriesPaged({ page, pageSize: PAGE_SIZE }),
+    countProductsPerIndustry(),
+  ]);
 
-export default function IndustriesAdminPage() {
   return (
     <>
       <div className="page-h">
         <div>
           <div className="crumb">Nội dung / <span>Ngành ứng dụng</span></div>
           <h1>Ngành ứng dụng</h1>
-          <p>Mặc định 3 ngành chính. Có thể thêm ngành mới và bật hiển thị bất cứ lúc nào.</p>
+          <p>Tag áp dụng vào sản phẩm. Có thể thêm ngành mới và bật hiển thị bất cứ lúc nào.</p>
         </div>
-        <Link href="/admin/industries/new" className="btn btn--primary">+ Thêm ngành mới</Link>
+        <ButtonLink href="/admin/industries/new" icon={Plus}>Thêm ngành mới</ButtonLink>
       </div>
 
-      <div className="card">
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Mã</th>
-              <th>Tên ngành</th>
-              <th>Sản phẩm</th>
-              <th>Bài viết</th>
-              <th>Mặc định</th>
-              <th>Hiển thị</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {ITEMS.map((i) => (
-              <tr key={i.id} className="cursor-pointer">
-                <td>
-                  <span className="inline-flex w-7 h-7 rounded-md bg-[#FFE4E6] text-brand-700 items-center justify-center font-bold">
-                    {i.code}
-                  </span>
-                </td>
-                <td className="tbl__name">
-                  <Link href={`/admin/industries/${i.id}`}>{i.name}</Link>
-                </td>
-                <td>{i.products}</td>
-                <td>{i.articles}</td>
-                <td>
-                  {i.default ? (
-                    <Pill status="published" />
-                  ) : (
-                    <span className="text-n-400 text-xs">—</span>
-                  )}
-                </td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <Toggle
-                    on={i.visible}
-                    onChange={() => showToast("Đã đổi trạng thái ngành")}
-                  />
-                </td>
-                <td onClick={(e) => e.stopPropagation()}><ActionRow /></td>
+      <Card>
+        {items.length === 0 ? (
+          <EmptyState
+            icon={Factory}
+            title="Chưa có ngành ứng dụng"
+            description="Tạo ngành đầu tiên (ví dụ: Sơn nước)."
+            action={
+              <ButtonLink href="/admin/industries/new" icon={ArrowRight} iconPosition="right" size="sm">
+                Thêm ngành đầu tiên
+              </ButtonLink>
+            }
+          />
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Tên ngành</th>
+                <th>Sản phẩm</th>
+                <th>Hiển thị</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {items.map((i) => (
+                <tr key={i.id} className="cursor-pointer">
+                  <td>
+                    <span
+                      className="inline-flex w-7 h-7 rounded-md items-center justify-center font-bold text-xs"
+                      style={{
+                        background: i.hex_color ? `${i.hex_color}22` : "#FFE4E6",
+                        color: i.hex_color ?? "var(--brand-700)",
+                      }}
+                    >
+                      {i.code ?? i.name.slice(0, 1).toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="tbl__name">
+                    <Link href={`/admin/industries/${i.id}`}>
+                      <div>{i.name}</div>
+                      <div className="tbl__sub">{i.slug}</div>
+                    </Link>
+                  </td>
+                  <td>{counts[i.id] ?? 0}</td>
+                  <td>
+                    <IndustryToggle id={i.id} initialEnabled={i.is_enabled} />
+                  </td>
+                  <td>
+                    <Link
+                      href={`/admin/industries/${i.id}`}
+                      className="tbl__act"
+                      title="Sửa"
+                      aria-label="Sửa"
+                    >
+                      <Pencil size={14} strokeWidth={1.75} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <Pagination
+          total={total}
+          page={page}
+          pageSize={PAGE_SIZE}
+          hrefFor={(p) => buildHref("/admin/industries", p)}
+        />
+      </Card>
     </>
   );
 }
