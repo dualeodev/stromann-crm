@@ -77,10 +77,10 @@ export default function ContactPage() {
           <div className="form-row">
             <label>Loại yêu cầu</label>
             <select className="input">
-              <option>Tư vấn kỹ thuật</option>
-              <option>Yêu cầu báo giá</option>
-              <option>Yêu cầu mẫu thử</option>
-              <option>Khác</option>
+              <option>Tối ưu phân tán pigment</option>
+              <option>Chọn hệ thống bọt phù hợp</option>
+              <option>Điều chỉnh độ nhớt</option>
+              <option>Xử lý lỗi sản xuất</option>
             </select>
           </div>
           <div className="form-row">
