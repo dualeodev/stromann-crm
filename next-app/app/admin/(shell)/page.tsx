@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { ArrowRight, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { ACTIVITY, NOTIFICATIONS } from "@/lib/admin/data";
 import { showToast } from "@/lib/admin/showToast";
 
@@ -19,7 +20,7 @@ const TOP_PRODUCTS: Array<{ name: string; group: string; views: number }> = [
 export default function DashboardPage() {
   useEffect(() => {
     const t = setTimeout(
-      () => showToast("🔔 Yêu cầu báo giá mới — Cty Sơn Nippon VN"),
+      () => showToast("Yêu cầu báo giá mới — Cty Sơn Nippon VN"),
       2500,
     );
     return () => clearTimeout(t);
@@ -35,7 +36,9 @@ export default function DashboardPage() {
         </div>
         <div className="flex gap-2">
           <button type="button" className="btn btn--secondary">Xuất báo cáo</button>
-          <button type="button" className="btn btn--primary">+ Thêm nội dung</button>
+          <button type="button" className="btn btn--primary inline-flex items-center gap-1.5">
+            <Plus size={14} /> Thêm nội dung
+          </button>
         </div>
       </div>
 
@@ -43,22 +46,22 @@ export default function DashboardPage() {
         <div className="stat stat--accent">
           <div className="stat__lbl">Yêu cầu mới hôm nay</div>
           <div className="stat__num">12</div>
-          <div className="stat__delta">▲ +4 so với hôm qua</div>
+          <div className="stat__delta inline-flex items-center gap-1"><TrendingUp size={12} /> +4 so với hôm qua</div>
         </div>
         <div className="stat">
           <div className="stat__lbl">Tổng sản phẩm</div>
           <div className="stat__num">72</div>
-          <div className="stat__delta up">▲ +3 tuần này</div>
+          <div className="stat__delta up inline-flex items-center gap-1"><TrendingUp size={12} /> +3 tuần này</div>
         </div>
         <div className="stat">
           <div className="stat__lbl">Lượt truy cập / 7 ngày</div>
           <div className="stat__num">8,432</div>
-          <div className="stat__delta up">▲ +12.4%</div>
+          <div className="stat__delta up inline-flex items-center gap-1"><TrendingUp size={12} /> +12.4%</div>
         </div>
         <div className="stat">
           <div className="stat__lbl">Tỷ lệ chuyển đổi</div>
           <div className="stat__num">3.8%</div>
-          <div className="stat__delta down">▼ -0.3%</div>
+          <div className="stat__delta down inline-flex items-center gap-1"><TrendingDown size={12} /> -0.3%</div>
         </div>
       </div>
 
@@ -92,20 +95,21 @@ export default function DashboardPage() {
         <div className="card">
           <div className="card__head">
             <h3>Thông báo gần nhất</h3>
-            <Link href="/admin/notifications" className="btn btn--ghost btn--sm">
-              Xem tất cả →
+            <Link href="/admin/notifications" className="btn btn--ghost btn--sm inline-flex items-center gap-1">
+              Xem tất cả <ArrowRight size={12} />
             </Link>
           </div>
           <div className="card__body p-0">
             {NOTIFICATIONS.slice(0, 4).map((n) => {
               const href = n.target ? `/admin/${n.target.page}/${n.target.id}` : "#";
+              const Icon = n.icon;
               return (
                 <Link
                   key={n.id}
                   href={href}
                   className={`notif ${n.unread ? "unread" : ""} pl-4 cursor-pointer`}
                 >
-                  <div className={`notif__icon ${n.type}`}>{n.icon}</div>
+                  <div className={`notif__icon ${n.type}`}><Icon size={16} strokeWidth={2} /></div>
                   <div className="notif__body">
                     <div className="notif__title">{n.title}</div>
                     <div className="notif__sub">{n.sub}</div>

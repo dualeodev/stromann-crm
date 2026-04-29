@@ -1,13 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Camera,
+  Code,
+  Download,
+  Eye,
+  FolderUp,
+  Image as ImageIcon,
+  Link2,
+  Trash2,
+} from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { LangTabs, type Lang } from "@/components/admin/forms/LangTabs";
 import { ChipMulti } from "@/components/admin/forms/ChipMulti";
 import { Pill } from "@/components/admin/atoms/Pill";
 import { showToast } from "@/lib/admin/showToast";
+
+const RTE_TOOLBAR: Array<{ key: string; el: ReactNode }> = [
+  { key: "b",   el: <b>B</b> },
+  { key: "i",   el: <i>I</i> },
+  { key: "u",   el: <u>U</u> },
+  { key: "h1",  el: "H1" },
+  { key: "h2",  el: "H2" },
+  { key: "ul",  el: "•" },
+  { key: "ol",  el: "1." },
+  { key: "lnk", el: <Link2 size={14} /> },
+  { key: "img", el: <ImageIcon size={14} /> },
+  { key: "code", el: <Code size={14} /> },
+];
 
 type AppMatrix = Record<string, boolean>;
 
@@ -72,8 +95,16 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
         badge={!isNew ? <Pill status="published" /> : undefined}
         actions={
           <>
-            {!isNew && <button type="button" className="btn btn--secondary">⤓ Xuất COA</button>}
-            {!isNew && <button type="button" className="btn btn--secondary">👁 Xem trên website</button>}
+            {!isNew && (
+              <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+                <Download size={14} /> Xuất COA
+              </button>
+            )}
+            {!isNew && (
+              <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+                <Eye size={14} /> Xem trên website
+              </button>
+            )}
             <button type="button" className="btn btn--ghost">Lưu nháp</button>
             <button
               type="button"
@@ -126,10 +157,14 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
             <div className="field">
               <label>Mô tả chi tiết</label>
               <div className="border border-n-300 rounded-lg overflow-hidden">
-                <div className="p-1.5 bg-n-50 border-b border-n-200 flex gap-0.5">
-                  {["B", "I", "U", "H1", "H2", "•", "1.", "🔗", "📷", "</>"].map((t) => (
-                    <button key={t} type="button" className="px-2 py-1 text-xs font-semibold text-n-700 rounded">
-                      {t}
+                <div className="p-1.5 bg-n-50 border-b border-n-200 flex gap-0.5 items-center">
+                  {RTE_TOOLBAR.map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      className="px-2 py-1 text-xs font-semibold text-n-700 rounded inline-flex items-center"
+                    >
+                      {t.el}
                     </button>
                   ))}
                 </div>
@@ -190,7 +225,7 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
 
           <FormSection
             title="Bảng ứng dụng"
-            desc="Đánh dấu ✓ ở các ô loại sản phẩm cuối phù hợp — hiển thị thành matrix trên trang chi tiết."
+            desc="Tích chọn các ô loại sản phẩm cuối phù hợp — hiển thị thành matrix trên trang chi tiết."
           >
             <table className="tbl border border-n-200 rounded-lg overflow-hidden">
               <thead>
@@ -243,20 +278,24 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
                     </div>
                   </div>
                   <span className="pill pill--info">{d.type}</span>
-                  <button type="button" className="tbl__act" title="Tải xuống">⤓</button>
+                  <button type="button" className="tbl__act" title="Tải xuống" aria-label="Tải xuống">
+                    <Download size={14} strokeWidth={1.75} />
+                  </button>
                   <button
                     type="button"
                     className="tbl__act danger"
                     title="Xóa"
+                    aria-label="Xóa"
                     onClick={() => setDocs(docs.filter((_, x) => x !== i))}
                   >
-                    🗑
+                    <Trash2 size={14} strokeWidth={1.75} />
                   </button>
                 </div>
               ))}
             </div>
             <div className="border-2 border-dashed border-n-300 rounded-lg p-6 text-center text-n-500 text-[13px]">
-              📁 Kéo thả file PDF vào đây hoặc{" "}
+              <FolderUp size={20} className="inline mr-2 -mt-0.5" />
+              Kéo thả file PDF vào đây hoặc{" "}
               <a className="text-brand-500 font-semibold cursor-pointer">chọn từ máy</a>
               <div className="text-[11px] mt-1">Tối đa 10MB · Hỗ trợ PDF</div>
             </div>
@@ -304,8 +343,8 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
             </div>
             <div className="field">
               <label>OG image (1200×630)</label>
-              <div className="border-2 border-dashed border-n-300 rounded-lg p-4 text-center text-xs text-n-500">
-                📷 Chọn ảnh OG
+              <div className="border-2 border-dashed border-n-300 rounded-lg p-4 text-center text-xs text-n-500 inline-flex items-center justify-center gap-1.5 w-full">
+                <Camera size={14} /> Chọn ảnh OG
               </div>
             </div>
           </FormSection>
@@ -326,14 +365,14 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
               <div className="field">
                 <label>Ảnh sản phẩm</label>
                 <div
-                  className="border border-n-200 rounded-lg flex items-center justify-center text-n-500 text-xs"
+                  className="border border-n-200 rounded-lg flex items-center justify-center gap-1.5 text-n-500 text-xs"
                   style={{
                     aspectRatio: "1",
                     background:
                       "repeating-linear-gradient(45deg, #FFE4E6 0 8px, #fff 8px 16px)",
                   }}
                 >
-                  📷 Chọn ảnh chính
+                  <Camera size={14} /> Chọn ảnh chính
                 </div>
               </div>
               <div className="field">
@@ -393,10 +432,10 @@ export default function ProductDetailAdminPage({ params }: { params: { id: strin
           {!isNew && (
             <button
               type="button"
-              className="btn btn--danger w-full mt-4 justify-center"
+              className="btn btn--danger w-full mt-4 justify-center inline-flex items-center gap-1.5"
               style={{ border: "1px solid #FCA5A5", background: "#FEF2F2" }}
             >
-              🗑 Xóa sản phẩm này
+              <Trash2 size={14} /> Xóa sản phẩm này
             </button>
           )}
         </div>

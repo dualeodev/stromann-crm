@@ -38,7 +38,7 @@ export function Sidebar() {
             href={hrefFor(item.id)}
             className={`sb__item ${isActive(pathname, item.id) ? "active" : ""}`}
           >
-            <span className="sb__icon">{item.icon}</span>
+            <span className="sb__icon"><item.icon size={18} strokeWidth={1.75} /></span>
             <span>{item.label}</span>
             {item.count != null && (
               <span className={`sb__count ${item.hot ? "sb__count--hot" : ""}`}>

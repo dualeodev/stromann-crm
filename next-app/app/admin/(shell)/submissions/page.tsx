@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Download,
+  DollarSign,
+  FileText,
+  Mail,
+  Settings,
+  TrendingUp,
+  Wrench,
+} from "lucide-react";
 import { SUBMISSIONS } from "@/lib/admin/data";
 import { Pill } from "@/components/admin/atoms/Pill";
 import { ActionRow } from "@/components/admin/atoms/ActionRow";
@@ -38,8 +47,12 @@ export default function SubmissionsPage() {
           <p>Tất cả yêu cầu báo giá, tư vấn kỹ thuật, liên hệ và ứng tuyển từ website.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" className="btn btn--secondary">⤓ Xuất CSV</button>
-          <button type="button" className="btn btn--secondary">⚙ Cấu hình thông báo</button>
+          <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+            <Download size={14} /> Xuất CSV
+          </button>
+          <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+            <Settings size={14} /> Cấu hình thông báo
+          </button>
         </div>
       </div>
 
@@ -53,7 +66,7 @@ export default function SubmissionsPage() {
         <div className="stat">
           <div className="stat__lbl">Đã xử lý (7 ngày)</div>
           <div className="stat__num">93</div>
-          <div className="stat__delta up">▲ +18%</div>
+          <div className="stat__delta up inline-flex items-center gap-1"><TrendingUp size={12} /> +18%</div>
         </div>
         <div className="stat">
           <div className="stat__lbl">Thời gian phản hồi TB</div>
@@ -86,16 +99,16 @@ export default function SubmissionsPage() {
               <span className="w-px bg-n-200 mx-1"></span>
               {(
                 [
-                  ["type-quote",   "💰 Báo giá"],
-                  ["type-tech",    "🛠 Tư vấn KT"],
-                  ["type-cv",      "📄 CV"],
-                  ["type-contact", "✉ Liên hệ"],
-                ] as Array<[FilterKey, string]>
+                  ["type-quote",   <><DollarSign size={12} /> Báo giá</>],
+                  ["type-tech",    <><Wrench size={12} /> Tư vấn KT</>],
+                  ["type-cv",      <><FileText size={12} /> CV</>],
+                  ["type-contact", <><Mail size={12} /> Liên hệ</>],
+                ] as Array<[FilterKey, ReactNode]>
               ).map(([k, l]) => (
                 <button
                   key={k}
                   type="button"
-                  className={`chip ${filter === k ? "active" : ""}`}
+                  className={`chip inline-flex items-center gap-1 ${filter === k ? "active" : ""}`}
                   onClick={() => setFilter(k)}
                 >
                   {l}

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { showToast } from "@/lib/admin/showToast";
@@ -63,9 +64,14 @@ export default function TechDetailPage({ params }: { params: { id: string } }) {
             <input className="input" defaultValue="Phân tán (Dispersion)" />
           </div>
           <div className="field">
+            <label>Mã định danh</label>
+            <input className="input w-32" defaultValue="dispersion" />
+            <div className="text-[11px] text-n-500 mt-1">stromann.vn/van-de-ky-thuat/<b>dispersion</b></div>
+          </div>
+          <div className="field hidden">
             <label>Icon</label>
             <div className="flex gap-1.5">
-              {["⚗️", "💧", "🌀", "✨", "🎨"].map((e) => (
+              {["dispersion","viscosity","leveling","sheen","tinting"].map((e) => (
                 <button
                   key={e}
                   type="button"
@@ -102,14 +108,19 @@ export default function TechDetailPage({ params }: { params: { id: string } }) {
             className="border border-n-200 rounded-r-12 p-4 mb-3 relative"
           >
             <div className="absolute top-3 right-3 flex gap-1">
-              <button type="button" className="tbl__act">↑</button>
-              <button type="button" className="tbl__act">↓</button>
+              <button type="button" className="tbl__act" aria-label="Lên">
+                <ArrowUp size={14} strokeWidth={1.75} />
+              </button>
+              <button type="button" className="tbl__act" aria-label="Xuống">
+                <ArrowDown size={14} strokeWidth={1.75} />
+              </button>
               <button
                 type="button"
                 className="tbl__act danger"
+                aria-label="Xóa"
                 onClick={() => setSolutions(solutions.filter((_, x) => x !== i))}
               >
-                🗑
+                <Trash2 size={14} strokeWidth={1.75} />
               </button>
             </div>
             <div

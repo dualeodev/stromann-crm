@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Camera, Eye, Trash2 } from "lucide-react";
 import { DetailHeader } from "@/components/admin/layout/DetailHeader";
 import { FormSection } from "@/components/admin/forms/FormSection";
 import { LangTabs, type Lang } from "@/components/admin/forms/LangTabs";
@@ -48,7 +49,11 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
         badge={!isNew ? <Pill status="active" /> : undefined}
         actions={
           <>
-            {!isNew && <button type="button" className="btn btn--secondary">👁 Xem trên website</button>}
+            {!isNew && (
+              <button type="button" className="btn btn--secondary inline-flex items-center gap-1.5">
+                <Eye size={14} /> Xem trên website
+              </button>
+            )}
             <button type="button" className="btn btn--ghost">Lưu nháp</button>
             <button
               type="button"
@@ -92,23 +97,8 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
                 <input className="input w-20" defaultValue="S" maxLength={2} />
               </div>
               <div className="field">
-                <label>Icon</label>
-                <div className="flex gap-1.5">
-                  {["🎨", "🖌", "🏭", "💧", "🧪", "✨"].map((e) => (
-                    <button
-                      key={e}
-                      type="button"
-                      className="w-9 h-9 text-lg border border-n-300 rounded-lg"
-                      style={
-                        e === "🎨"
-                          ? { background: "#FFE4E6", borderColor: "var(--brand-500)" }
-                          : { background: "#fff" }
-                      }
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
+                <label>Mã màu (hex)</label>
+                <input className="input w-32" defaultValue="#E11D2C" />
               </div>
             </div>
             <div className="field">
@@ -139,26 +129,26 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
                   background: "linear-gradient(135deg, #FFE4E6, #FECACA)",
                 }}
               >
-                <span>🎨 Sơn</span>
+                <span>Sơn</span>
                 <button
                   type="button"
-                  className="absolute top-2 right-2 px-2.5 py-1 bg-white rounded-md text-[11px] font-semibold"
+                  className="absolute top-2 right-2 px-2.5 py-1 bg-white rounded-md text-[11px] font-semibold inline-flex items-center gap-1"
                 >
-                  📷 Đổi ảnh
+                  <Camera size={12} /> Đổi ảnh
                 </button>
               </div>
             </div>
             <div className="field">
               <label>Banner trang chi tiết (1920×600)</label>
               <div
-                className="border border-dashed border-n-300 rounded-lg flex items-center justify-center text-n-500 text-[13px]"
+                className="border border-dashed border-n-300 rounded-lg flex items-center justify-center gap-1.5 text-n-500 text-[13px]"
                 style={{
                   aspectRatio: "1920/600",
                   background:
                     "repeating-linear-gradient(45deg, var(--n-100) 0 8px, #fff 8px 16px)",
                 }}
               >
-                📷 Chọn banner ngành
+                <Camera size={14} /> Chọn banner ngành
               </div>
             </div>
           </FormSection>
@@ -178,16 +168,17 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
                     <div className="font-semibold text-[13px]">{p}</div>
                     <div className="text-[11px] text-n-500">MÜNZING · Defoamer</div>
                   </div>
-                  <button type="button" className="tbl__act">↑</button>
-                  <button type="button" className="tbl__act">↓</button>
+                  <button type="button" className="tbl__act" aria-label="Lên">↑</button>
+                  <button type="button" className="tbl__act" aria-label="Xuống">↓</button>
                   <button
                     type="button"
                     className="tbl__act danger"
+                    aria-label="Xóa"
                     onClick={() =>
                       setLinkedProducts(linkedProducts.filter((x) => x !== p))
                     }
                   >
-                    🗑
+                    <Trash2 size={14} strokeWidth={1.75} />
                   </button>
                 </div>
               ))}
@@ -200,7 +191,7 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
               + Thêm sản phẩm vào ngành
             </button>
             <div className="mt-3 p-3 bg-[#F0F9FF] border border-[#BAE6FD] rounded-lg text-xs text-n-700">
-              💡 Sản phẩm cũng có thể tự động liên kết bằng cách gắn ngành này khi sửa từng sản phẩm.
+              Sản phẩm cũng có thể tự động liên kết bằng cách gắn ngành này khi sửa từng sản phẩm.
             </div>
           </FormSection>
 
@@ -321,10 +312,10 @@ export default function IndustryDetailPage({ params }: { params: { id: string } 
           {!isNew && (
             <button
               type="button"
-              className="btn btn--danger w-full mt-4 justify-center"
+              className="btn btn--danger w-full mt-4 justify-center inline-flex items-center gap-1.5"
               style={{ border: "1px solid #FCA5A5", background: "#FEF2F2" }}
             >
-              🗑 Xóa ngành này
+              <Trash2 size={14} /> Xóa ngành này
             </button>
           )}
         </div>
