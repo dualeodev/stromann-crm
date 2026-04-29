@@ -1,13 +1,18 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Tag, Btn, SectHead, ProductImage, IndustryImage, LinkArrow } from "@/components/ui";
-import { WHY_ROWS, NEWS } from "@/lib/data";
+import { WHY_ROWS } from "@/lib/data";
 import {
   countProductsPerIndustry,
   listProductIndustries,
   listProducts,
 } from "@/lib/catalog";
 import { listActiveBanners, bannerImageUrl } from "@/lib/admin/banners";
+import {
+  listPublishedNews,
+  newsImageUrl,
+  NEWS_CATEGORY_LABEL,
+} from "@/lib/admin/news";
 import type { BannerRow } from "@/lib/admin/types";
 
 function HomeHero({ banner }: { banner: BannerRow | null }) {
@@ -91,11 +96,12 @@ function HomeHero({ banner }: { banner: BannerRow | null }) {
 const STAT_BAR_STYLE = (w: string): CSSProperties => ({ width: w });
 
 export default async function HomePage() {
-  const [heroBanners, homepageIndustries, indCounts, featured] = await Promise.all([
+  const [heroBanners, homepageIndustries, indCounts, featured, latestNews] = await Promise.all([
     listActiveBanners("hero_home"),
     listProductIndustries({ enabledOnly: true }),
     countProductsPerIndustry(),
     listProducts({ publishedOnly: true, featuredOnly: true, pageSize: 6, sort: "popular" }),
+    listPublishedNews({ limit: 3 }),
   ]);
   const banner = heroBanners[0] ?? null;
   const swatchIndustries = homepageIndustries.filter((i) => i.show_on_homepage).slice(0, 3);
@@ -332,18 +338,35 @@ export default async function HomePage() {
           right={<LinkArrow href="/news">Xem tất cả tin</LinkArrow>}
         />
         <div className="news-grid mt-12">
-          {NEWS.slice(0, 3).map((n) => (
-            <Link key={n.id} href={`/news/${n.id}`} className="news-card">
-              <div className="news-card__media"><IndustryImage label={n.tag.toLowerCase()} /></div>
-              <div className="news-card__body">
-                <Tag variant="brand-soft">{n.tag}</Tag>
-                <h3 className="news-card__title">{n.title}</h3>
-                <div className="news-card__meta mt-auto">
-                  <span>{n.date}</span><span>•</span><span>{n.read}</span>
+          {latestNews.map((n) => {
+            const cover = newsImageUrl(n.cover_path);
+            const date = (n.published_at ?? n.created_at)
+              ? new Date(n.published_at ?? n.created_at).toLocaleDateString("vi-VN", {
+                  day: "2-digit", month: "short", year: "numeric",
+                })
+              : "";
+            return (
+              <Link key={n.id} href={`/news/${n.slug}`} className="news-card">
+                <div className="news-card__media">
+                  {cover ? (
+                    <div
+                      className="w-full h-full"
+                      style={{ background: `url(${cover}) center/cover no-repeat` }}
+                    />
+                  ) : (
+                    <IndustryImage label={NEWS_CATEGORY_LABEL[n.category].toLowerCase()} />
+                  )}
                 </div>
-              </div>
-            </Link>
-          ))}
+                <div className="news-card__body">
+                  <Tag variant="brand-soft">{NEWS_CATEGORY_LABEL[n.category]}</Tag>
+                  <h3 className="news-card__title">{n.title}</h3>
+                  <div className="news-card__meta mt-auto">
+                    <span>{date}</span><span>•</span><span>{n.read_minutes} phút đọc</span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

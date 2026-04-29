@@ -4,14 +4,6 @@ export interface WhyRow {
   desc: string;
 }
 
-export interface NewsItem {
-  id: string;
-  tag: string;
-  title: string;
-  date: string;
-  read: string;
-}
-
 export interface TimelineItem {
   year: string;
   title: string;

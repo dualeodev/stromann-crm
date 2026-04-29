@@ -1,28 +1,131 @@
-"use client";
-
 import Link from "next/link";
-import { Pill } from "@/components/admin/atoms/Pill";
-import { ActionRow } from "@/components/admin/atoms/ActionRow";
+import { ArrowRight, Newspaper, Pencil, Plus } from "lucide-react";
+import {
+  ButtonLink,
+  Card,
+  DataTable,
+  EmptyState,
+  LangChip,
+  Pagination,
+  Pill,
+  type Column,
+} from "@/components/admin/atoms";
+import {
+  listNewsPaged,
+  newsImageUrl,
+  newsStatus,
+  NEWS_CATEGORIES,
+  NEWS_CATEGORY_LABEL,
+} from "@/lib/admin/news";
+import type { NewsCategory, NewsRow } from "@/lib/admin/types";
 
-interface NewsRow {
-  id: string;
-  title: string;
-  category: string;
-  author: string;
-  views: number;
-  status: "published" | "draft";
-  date: string;
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
-const ITEMS: NewsRow[] = [
-  { id: "n1", title: "5 lưu ý chọn defoamer cho sơn nước hệ acrylic", category: "Kiến thức KT", author: "Tech Team",  views: 1240, status: "published", date: "25/04/2026" },
-  { id: "n2", title: "Case study: tối ưu công thức mực in flexo",     category: "Ứng dụng",     author: "Tech Team",  views: 892,  status: "published", date: "18/04/2026" },
-  { id: "n3", title: "MÜNZING ra mắt dòng AGITAN® thế hệ mới",       category: "Sản phẩm",     author: "Marketing",  views: 1450, status: "published", date: "10/04/2026" },
-  { id: "n4", title: "Stromann tham gia VietnamCoatings Expo 2026",   category: "Sự kiện",      author: "Marketing",  views: 320,  status: "published", date: "02/04/2026" },
-  { id: "n5", title: "Wetting agent: cách chọn đúng cho từng loại pigment", category: "Kiến thức KT", author: "Tech Team", views: 0, status: "draft", date: "—" },
+const columns: Column<NewsRow>[] = [
+  {
+    key: "thumb",
+    header: "",
+    width: "76px",
+    cell: (n) => {
+      const url = newsImageUrl(n.cover_path);
+      return url ? (
+        <div
+          className="thumb"
+          style={{
+            background: `url(${url}) center/cover no-repeat`,
+            borderColor: "var(--n-200)",
+          }}
+          aria-label={n.title}
+        />
+      ) : (
+        <div className="thumb thumb--brand" />
+      );
+    },
+  },
+  {
+    key: "title",
+    header: "Bài viết",
+    cell: (n) => (
+      <Link href={`/admin/news/${n.id}`}>
+        <div className="tbl__name">{n.title}</div>
+        <div className="tbl__sub">{n.excerpt ?? n.slug}</div>
+      </Link>
+    ),
+  },
+  {
+    key: "category",
+    header: "Chuyên mục",
+    cell: (n) => (
+      <span className="text-[11px] px-2 py-0.5 bg-n-100 rounded">
+        {NEWS_CATEGORY_LABEL[n.category]}
+      </span>
+    ),
+  },
+  {
+    key: "published_at",
+    header: "Ngày đăng",
+    cell: (n) => <span className="text-xs">{formatDate(n.published_at)}</span>,
+  },
+  {
+    key: "status",
+    header: "Trạng thái",
+    cell: (n) => <Pill status={newsStatus(n)} />,
+  },
+  {
+    key: "lang",
+    header: "Ngôn ngữ",
+    cell: (n) => <LangChip lang={{ vn: n.lang_vn, en: n.lang_en, cn: n.lang_cn }} />,
+  },
+  {
+    key: "actions",
+    header: "",
+    width: "40px",
+    cell: (n) => (
+      <Link
+        href={`/admin/news/${n.id}`}
+        className="tbl__act"
+        title="Sửa"
+        aria-label="Sửa"
+      >
+        <Pencil size={14} strokeWidth={1.75} />
+      </Link>
+    ),
+  },
 ];
 
-export default function NewsAdminPage() {
+const PAGE_SIZE = 20;
+
+function buildHref(base: string, page: number, category: NewsCategory | null) {
+  const params = new URLSearchParams();
+  if (page > 1) params.set("page", String(page));
+  if (category) params.set("cat", category);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+export default async function NewsAdminPage({
+  searchParams = {},
+}: {
+  searchParams?: { page?: string; cat?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page ?? 1));
+  const cat = (NEWS_CATEGORIES as readonly string[]).includes(searchParams.cat ?? "")
+    ? (searchParams.cat as NewsCategory)
+    : null;
+
+  const { rows, total } = await listNewsPaged({
+    page,
+    pageSize: PAGE_SIZE,
+    category: cat,
+  });
+
   return (
     <>
       <div className="page-h">
@@ -31,43 +134,63 @@ export default function NewsAdminPage() {
           <h1>Quản lý tin tức</h1>
           <p>4 chuyên mục: Kiến thức kỹ thuật · Ứng dụng thực tế · Sản phẩm · Tin công ty.</p>
         </div>
-        <Link href="/admin/news/new" className="btn btn--primary">+ Viết bài mới</Link>
+        <ButtonLink href="/admin/news/new" icon={Plus}>Viết bài mới</ButtonLink>
       </div>
 
-      <div className="card">
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Tiêu đề</th>
-              <th>Chuyên mục</th>
-              <th>Tác giả</th>
-              <th>Lượt xem</th>
-              <th>Trạng thái</th>
-              <th>Ngày đăng</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {ITEMS.map((n) => (
-              <tr key={n.id} className="cursor-pointer">
-                <td className="tbl__name">
-                  <Link href={`/admin/news/${n.id}`}>{n.title}</Link>
-                </td>
-                <td>
-                  <span className="text-[11px] px-2 py-0.5 bg-n-100 rounded">
-                    {n.category}
-                  </span>
-                </td>
-                <td>{n.author}</td>
-                <td>{n.views.toLocaleString()}</td>
-                <td><Pill status={n.status} /></td>
-                <td><span className="text-xs text-n-600">{n.date}</span></td>
-                <td onClick={(e) => e.stopPropagation()}><ActionRow /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Link
+          href="/admin/news"
+          className={`chip-btn${cat === null ? " active" : ""}`}
+          style={{ color: cat === null ? "#fff" : "var(--n-700)" }}
+        >
+          Tất cả
+        </Link>
+        {NEWS_CATEGORIES.map((c) => {
+          const isActive = cat === c;
+          return (
+            <Link
+              key={c}
+              href={`/admin/news?cat=${c}`}
+              className={`chip-btn${isActive ? " active" : ""}`}
+              style={{ color: isActive ? "#fff" : "var(--n-700)" }}
+            >
+              {NEWS_CATEGORY_LABEL[c]}
+            </Link>
+          );
+        })}
       </div>
+
+      <Card>
+        <DataTable
+          rows={rows}
+          columns={columns}
+          rowKey={(n) => n.id}
+          empty={
+            <EmptyState
+              icon={Newspaper}
+              title="Chưa có bài viết nào"
+              description="Tạo bài viết đầu tiên cho mục Tin tức."
+              action={
+                <ButtonLink
+                  href="/admin/news/new"
+                  icon={ArrowRight}
+                  iconPosition="right"
+                  size="sm"
+                  className="!text-white"
+                >
+                  Viết bài đầu tiên
+                </ButtonLink>
+              }
+            />
+          }
+        />
+        <Pagination
+          total={total}
+          page={page}
+          pageSize={PAGE_SIZE}
+          hrefFor={(p) => buildHref("/admin/news", p, cat)}
+        />
+      </Card>
     </>
   );
 }

@@ -2,7 +2,6 @@ import type {
   Benefit,
   CompanyValue,
   Job,
-  NewsItem,
   Stat,
   TimelineItem,
   WhyRow,
@@ -13,15 +12,6 @@ export const WHY_ROWS: WhyRow[] = [
   { num: "02", title: "Có hỗ trợ kỹ thuật", desc: "Đội kỹ sư riêng phục vụ R&D + xử lý sự cố công thức." },
   { num: "03", title: "COA / MSDS đầy đủ", desc: "Mỗi lô hàng có chứng từ kỹ thuật chuẩn quốc tế." },
   { num: "04", title: "Phản hồi nhanh", desc: "Cam kết phản hồi báo giá / yêu cầu mẫu trong vòng 4h làm việc." },
-];
-
-export const NEWS: NewsItem[] = [
-  { id: "n1", tag: "KIẾN THỨC KỸ THUẬT", title: "5 lưu ý chọn defoamer cho sơn nước hệ acrylic", date: "25 Apr 2026", read: "5 phút đọc" },
-  { id: "n2", tag: "ỨNG DỤNG THỰC TẾ", title: "Case study: tối ưu công thức mực in flexo bằng dispersant mới", date: "18 Apr 2026", read: "7 phút đọc" },
-  { id: "n3", tag: "SẢN PHẨM", title: "MÜNZING ra mắt dòng AGITAN® thế hệ mới — đã có hàng tại Việt Nam", date: "10 Apr 2026", read: "4 phút đọc" },
-  { id: "n4", tag: "SỰ KIỆN", title: "Stromann tham gia VietnamCoatings Expo 2026 tại SECC", date: "02 Apr 2026", read: "3 phút đọc" },
-  { id: "n5", tag: "KIẾN THỨC KỸ THUẬT", title: "Wetting agent: cách chọn đúng cho từng loại pigment", date: "28 Mar 2026", read: "6 phút đọc" },
-  { id: "n6", tag: "CÔNG TY", title: "Mở rộng kho miền Bắc — giao hàng 24h cho khách Hà Nội & lân cận", date: "15 Mar 2026", read: "2 phút đọc" },
 ];
 
 export const TIMELINE: TimelineItem[] = [

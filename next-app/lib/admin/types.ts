@@ -111,6 +111,34 @@ export interface BannerRow {
   updated_at: string;
 }
 
+export type NewsCategory =
+  | "tech_knowledge"
+  | "real_application"
+  | "product"
+  | "company";
+
+export type NewsAdminStatus = "published" | "draft" | "scheduled";
+
+export interface NewsRow {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  body_html: string;
+  category: NewsCategory;
+  cover_path: string | null;
+  read_minutes: number;
+  is_published: boolean;
+  published_at: string | null;
+  lang_vn: boolean;
+  lang_en: boolean;
+  lang_cn: boolean;
+  meta_title: string | null;
+  meta_description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ActivityEntry {
   who: string;
   what: string;
