@@ -5,6 +5,8 @@ import { AdminShell } from "@/components/admin/layout/AdminShell";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminNavCounts } from "@/lib/catalog";
 
+export const dynamic = "force-dynamic";
+
 export default async function ShellLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

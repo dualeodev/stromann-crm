@@ -1,0 +1,35 @@
+# Local-dev stack: chạy Next.js trong Docker, Supabase chạy ngoài qua
+# `supabase start` (tự dùng Docker Desktop). App container kết nối Supabase
+# qua host.docker.internal — đồng thời browser cũng phải resolve được hostname
+# này (thêm `127.0.0.1 host.docker.internal` vào /etc/hosts trên macOS/Linux
+# nếu Docker Desktop chưa add sẵn).
+#
+# Dùng:
+#   1. cd next-app && supabase start    (lấy ANON_KEY + SERVICE_ROLE_KEY)
+#   2. cp docker/.env.local.example docker/.env.local  và điền key
+#   3. docker compose -f docker/docker-compose.local.yml --env-file docker/.env.local up --build
+#   4. Mở http://localhost:3000
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* được bake vào client bundle lúc build → browser sẽ
+        # gọi đúng URL này.
+        NEXT_PUBLIC_SUPABASE_URL: http://host.docker.internal:54321
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+    image: stromann-app:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_SUPABASE_URL: http://host.docker.internal:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      ADMIN_USERNAME_EMAIL_DOMAIN: ${ADMIN_USERNAME_EMAIL_DOMAIN:-stromann.local}
+    extra_hosts:
+      # Linux: bắt buộc. macOS/Windows Docker Desktop tự có sẵn.
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"

@@ -86,7 +86,7 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
             Đội kỹ sư Stromann sẵn sàng hỗ trợ bạn — phản hồi trong 4h làm việc.
           </p>
           <div className="flex gap-3 mt-5 flex-wrap">
-            <Btn variant="primary" href="/contact">Tư vấn kỹ thuật →</Btn>
+            <Btn variant="primary" href="/technical">Tư vấn kỹ thuật →</Btn>
             <Btn variant="white" href="/quote">Yêu cầu báo giá</Btn>
           </div>
         </aside>

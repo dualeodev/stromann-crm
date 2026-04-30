@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ExternalLink, HelpCircle, LogOut, Search } from "lucide-react";
+import { ExternalLink, LogOut } from "lucide-react";
 import { logoutAction } from "@/app/admin/login/actions";
 import type { AdminUser } from "@/lib/admin/types";
 
@@ -19,34 +19,14 @@ function initials(name: string) {
 
 export function TopBar({
   user,
-  onOpenDrawer,
 }: {
   user: AdminUser;
-  onOpenDrawer: () => void;
+  onOpenDrawer?: () => void;
 }) {
   return (
     <div className="topbar">
-      <div className="searchbar">
-        <Search size={16} className="text-n-500" strokeWidth={2} />
-        <input placeholder="Tìm sản phẩm, bài viết, yêu cầu, người dùng..." />
-        <span className="text-[11px] text-n-400 px-1.5 py-0.5 border border-n-300 rounded">
-          ⌘K
-        </span>
-      </div>
+      <div className="flex-1" />
       <div className="tb__right">
-        <button type="button" className="tb__btn" title="Trợ giúp" aria-label="Trợ giúp">
-          <HelpCircle size={18} strokeWidth={1.75} />
-        </button>
-        <button
-          type="button"
-          className="tb__btn relative"
-          title="Thông báo"
-          aria-label="Thông báo"
-          onClick={onOpenDrawer}
-        >
-          <Bell size={18} strokeWidth={1.75} />
-          <span className="dot"></span>
-        </button>
         <a
           className="tb__btn"
           href="/"

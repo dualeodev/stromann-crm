@@ -28,7 +28,13 @@ const PROCESS: ProcessStep[] = [
   },
 ];
 
-export default function QuotePage() {
+export default function QuotePage({
+  searchParams,
+}: {
+  searchParams?: { product?: string };
+}) {
+  const initialProduct = searchParams?.product?.trim() || undefined;
+
   return (
     <>
       <Breadcrumb items={[{ label: "Báo giá" }]} />
@@ -38,7 +44,7 @@ export default function QuotePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-10 px-20 py-16 max-lg:px-6">
-        <QuoteForm />
+        <QuoteForm initialProduct={initialProduct} />
 
         <aside className="flex flex-col gap-6">
           <div className="bg-n-900 text-white rounded-r-16 p-7">

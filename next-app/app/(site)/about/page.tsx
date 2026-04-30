@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tag, Btn, IndustryImage } from "@/components/ui";
+import { Tag, Btn } from "@/components/ui";
 import Breadcrumb from "@/components/Breadcrumb";
 import { TIMELINE, STATS } from "@/lib/data";
 
@@ -32,7 +32,11 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="h-[400px] rounded-r-16 overflow-hidden">
-            <IndustryImage label="company photo" />
+            <img
+              src="https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&w=1200&q=80"
+              alt="Phòng lab kỹ thuật Stromann"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </section>
@@ -76,7 +80,11 @@ export default function AboutPage() {
       <section className="section section--alt">
         <div className="grid grid-cols-2 gap-12 items-center">
           <div className="h-[320px] rounded-r-16 overflow-hidden">
-            <IndustryImage label="MÜNZING factory · Germany" />
+            <img
+              src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1200&q=80"
+              alt="MÜNZING factory · Germany"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <Tag variant="brand">ĐỐI TÁC CHIẾN LƯỢC</Tag>

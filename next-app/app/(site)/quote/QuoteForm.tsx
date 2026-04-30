@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Btn } from "@/components/ui";
+import BasicInfoFields from "@/components/forms/BasicInfoFields";
+import { submitQuoteForm, type SubmitResult } from "@/lib/submissions";
 
 interface ProductRow {
   id: number;
+  defaultName?: string;
 }
 
 function SectionHeading({ n, children }: { n: number; children: React.ReactNode }) {
@@ -18,42 +22,42 @@ function SectionHeading({ n, children }: { n: number; children: React.ReactNode 
   );
 }
 
-export default function QuoteForm() {
-  const [rows, setRows] = useState<ProductRow[]>([{ id: 1 }, { id: 2 }]);
-  const nextId = () => (rows.length === 0 ? 1 : Math.max(...rows.map((r) => r.id)) + 1);
+function SubmitBtn() {
+  const { pending } = useFormStatus();
+  return (
+    <Btn variant="primary" size="lg" className="w-full" as="button" type="submit" disabled={pending}>
+      {pending ? "Đang gửi..." : "Gửi yêu cầu báo giá"}
+    </Btn>
+  );
+}
 
+export default function QuoteForm({ initialProduct }: { initialProduct?: string }) {
+  const [rows, setRows] = useState<ProductRow[]>(() =>
+    initialProduct
+      ? [{ id: 1, defaultName: initialProduct }]
+      : [{ id: 1 }, { id: 2 }],
+  );
+  const [state, formAction] = useFormState<SubmitResult | null, FormData>(submitQuoteForm, null);
+
+  const nextId = () => (rows.length === 0 ? 1 : Math.max(...rows.map((r) => r.id)) + 1);
   const addRow = () => setRows((r) => [...r, { id: nextId() }]);
   const removeRow = (id: number) =>
     setRows((r) => (r.length > 1 ? r.filter((x) => x.id !== id) : r));
 
+  if (state?.ok) {
+    return (
+      <div className="bg-white border border-n-200 rounded-r-16 p-8">
+        <h3 className="mt-0 text-[22px] text-success">✓ Đã gửi yêu cầu báo giá</h3>
+        <p className="text-n-600">Đội ngũ Sales của Stromann sẽ liên hệ với bạn trong vòng 4h làm việc.</p>
+      </div>
+    );
+  }
+
   return (
-    <form className="bg-white border border-n-200 rounded-r-16 p-8">
+    <form action={formAction} className="bg-white border border-n-200 rounded-r-16 p-8">
       <section className="mb-10">
         <SectionHeading n={1}>Thông tin liên hệ</SectionHeading>
-        <div className="form-grid-2">
-          <div className="form-row">
-            <label>Họ tên <span className="req">*</span></label>
-            <input className="input" placeholder="Nguyễn Văn A" required />
-          </div>
-          <div className="form-row">
-            <label>Công ty <span className="req">*</span></label>
-            <input className="input" placeholder="Công ty TNHH ABC" required />
-          </div>
-        </div>
-        <div className="form-grid-2">
-          <div className="form-row">
-            <label>Email <span className="req">*</span></label>
-            <input className="input" type="email" placeholder="email@domain.com" required />
-          </div>
-          <div className="form-row">
-            <label>SĐT <span className="req">*</span></label>
-            <input className="input" placeholder="09xx xxx xxx" required />
-          </div>
-        </div>
-        <div className="form-row">
-          <label>Địa chỉ giao hàng</label>
-          <input className="input" placeholder="Số nhà / đường / quận / TP" />
-        </div>
+        <BasicInfoFields />
       </section>
 
       <section className="mb-10">
@@ -85,15 +89,21 @@ export default function QuoteForm() {
               <div className="grid grid-cols-1 md:grid-cols-[1fr_120px_120px] gap-4">
                 <div className="form-row !mb-0">
                   <label>Mã / tên sản phẩm <span className="req">*</span></label>
-                  <input className="input" placeholder="VD: AGITAN® 120" required />
+                  <input
+                    className="input"
+                    name="product_name"
+                    placeholder="VD: AGITAN® 120"
+                    defaultValue={r.defaultName ?? ""}
+                    required
+                  />
                 </div>
                 <div className="form-row !mb-0">
                   <label>Số lượng <span className="req">*</span></label>
-                  <input className="input" type="number" min="1" placeholder="100" required />
+                  <input className="input" name="product_qty" type="number" min="1" placeholder="100" required />
                 </div>
                 <div className="form-row !mb-0">
                   <label>Đơn vị <span className="req">*</span></label>
-                  <select className="input" defaultValue="Kg" required>
+                  <select className="input" name="product_unit" defaultValue="Kg" required>
                     <option>Kg</option>
                     <option>Lít</option>
                     <option>Thùng</option>
@@ -103,7 +113,7 @@ export default function QuoteForm() {
               </div>
               <div className="form-row !mb-0 mt-4">
                 <label>Ghi chú (tùy chọn)</label>
-                <input className="input" placeholder="VD: Cần tài liệu MSDS, mẫu thử..." />
+                <input className="input" name="product_note" placeholder="VD: Cần tài liệu MSDS, mẫu thử..." />
               </div>
             </div>
           ))}
@@ -111,19 +121,22 @@ export default function QuoteForm() {
       </section>
 
       <section className="mb-8">
-        <SectionHeading n={3}>Ghi chú &amp; file đính kèm</SectionHeading>
+        <SectionHeading n={3}>Ghi chú chung</SectionHeading>
         <div className="form-row">
-          <label>Ghi chú yêu cầu chung &amp; tệp đính kèm</label>
+          <label>Ghi chú yêu cầu chung</label>
           <textarea
             className="input"
+            name="general_note"
             placeholder="VD: Cần báo giá hệ acrylic-based, dùng cho sơn ngoài trời, môi trường ven biển có muối..."
           />
         </div>
       </section>
 
-      <Btn variant="primary" size="lg" className="w-full" as="button" type="submit">
-        Gửi yêu cầu báo giá
-      </Btn>
+      {state?.error && (
+        <div className="mb-4 p-3 rounded-r-8 bg-danger/10 text-danger text-sm">{state.error}</div>
+      )}
+
+      <SubmitBtn />
     </form>
   );
 }

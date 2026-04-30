@@ -59,15 +59,38 @@ export interface AdminNotification {
 
 export type SubmissionStatus = "new" | "in-progress" | "done";
 
+export type SubmissionType = "quote" | "technical" | "contact";
+
+export interface QuoteProduct {
+  name: string;
+  qty: number;
+  unit: string;
+  note?: string;
+}
+
 export interface Submission {
   id: string;
-  type: string;
+  type: SubmissionType;
+
+  full_name: string;
   company: string;
-  contact: string;
   email: string;
-  date: string;
+  phone: string;
+  address: string | null;
+
+  message: string | null;
+  technical_issue_id: string | null;
+  technical_issue_name: string | null;
+  technical_issue_slug: string | null;
+
+  products: QuoteProduct[] | null;
+  general_note: string | null;
+
   status: SubmissionStatus;
-  assignee: string | null;
+  assignee_id: string | null;
+
+  created_at: string;
+  updated_at: string;
 }
 
 export interface LangFlags {

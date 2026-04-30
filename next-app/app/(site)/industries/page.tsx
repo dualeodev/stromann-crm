@@ -1,15 +1,17 @@
-import type { Metadata } from "next";
-import { Tag, Btn, IndustryImage } from "@/components/ui";
-import Breadcrumb from "@/components/Breadcrumb";
+import type { Metadata } from 'next';
+import { Tag, Btn } from '@/components/ui';
+import Breadcrumb from '@/components/Breadcrumb';
 import {
   countProductsPerIndustry,
   listProductIndustries,
   listTechnicalIssues,
   type ProductIndustryRow,
   type TechIssueRow,
-} from "@/lib/catalog";
+} from '@/lib/catalog';
 
-export const metadata: Metadata = { title: "Ngành ứng dụng — Stromann Việt Nam" };
+export const metadata: Metadata = {
+  title: 'Ngành ứng dụng — Stromann Việt Nam',
+};
 
 function IndContent({
   ind,
@@ -22,29 +24,35 @@ function IndContent({
 }) {
   return (
     <div>
-      <Tag variant="brand-soft">{ind.code ?? "INDUSTRY"}</Tag>
-      <h2 className="text-[32px] font-bold m-0 my-3 tracking-[-0.01em]">{ind.name}</h2>
-      <p className="text-n-600 leading-[1.6] mb-6">
-        {ind.overview_description ?? ind.short_description ?? ""}
+      <Tag variant='brand-soft'>{ind.code ?? 'INDUSTRY'}</Tag>
+      <h2 className='text-[32px] font-bold m-0 my-3 tracking-[-0.01em]'>
+        {ind.name}
+      </h2>
+      <p className='text-n-600 leading-[1.6] mb-6'>
+        {ind.overview_description ?? ind.short_description ?? ''}
       </p>
       {techs.length > 0 && (
         <>
-          <h4 className="mb-4">Vấn đề Stromann có thể giải quyết:</h4>
-          <div className="problem-grid">
+          <h4 className='mb-4'>Vấn đề Stromann có thể giải quyết:</h4>
+          <div className='problem-grid'>
             {techs.map((t, i) => (
-              <div key={t.id} className="problem-card">
-                <div className="problem-card__num">{String(i + 1).padStart(2, "0")}</div>
+              <div key={t.id} className='problem-card'>
+                <div className='problem-card__num'>
+                  {String(i + 1).padStart(2, '0')}
+                </div>
                 <div>
-                  <div className="problem-card__title">{t.name}</div>
-                  {t.description && <div className="problem-card__desc">{t.description}</div>}
+                  <div className='problem-card__title'>{t.name}</div>
+                  {t.description && (
+                    <div className='problem-card__desc'>{t.description}</div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </>
       )}
-      <div className="mt-6 flex gap-3 items-center">
-        <Btn variant="primary" href={`/products?i=${ind.slug}`}>
+      <div className='mt-6 flex gap-3 items-center'>
+        <Btn variant='primary' href={`/products?i=${ind.slug}`}>
           Xem {productCount} sản phẩm cho ngành này →
         </Btn>
       </div>
@@ -61,43 +69,68 @@ export default async function IndustriesPage() {
 
   return (
     <>
-      <Breadcrumb items={[{ label: "Ngành ứng dụng" }]} />
+      <Breadcrumb items={[{ label: 'Ngành ứng dụng' }]} />
 
-      <div className="ind-hero">
+      <div className='ind-hero'>
         <div>
           <Tag>NGÀNH ỨNG DỤNG</Tag>
-          <h1 className="mt-4">
-            Giải pháp phụ gia cho<br />ngành công nghiệp
+          <h1 className='mt-4'>
+            Giải pháp phụ gia cho
+            <br />
+            ngành công nghiệp
           </h1>
-          <p className="text-n-300 text-base leading-[1.6] mt-4 max-w-[540px]">
-            Mỗi ngành có những thách thức kỹ thuật riêng — từ kiểm soát bọt khí trong sơn nước đến tối ưu phân tán pigment trong masterbatch. Stromann có giải pháp chuyên biệt cho từng nhu cầu.
+          <p className='text-n-300 text-base leading-[1.6] mt-4 max-w-[540px]'>
+            Mỗi ngành có những thách thức kỹ thuật riêng — từ kiểm soát bọt khí
+            trong sơn nước đến tối ưu phân tán pigment trong masterbatch.
+            Stromann có giải pháp chuyên biệt cho từng nhu cầu.
           </p>
         </div>
-        <div className="ind-hero__media">
-          <IndustryImage label={`industries · ${industries.length} ngành`} dark />
+        <div className='ind-hero__media'>
+          <img
+            src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1600&q=80"
+            alt={`industries · ${industries.length} ngành`}
+            className='w-full h-full object-cover'
+          />
         </div>
       </div>
 
       {industries.map((ind, i) => {
         const altRow = i % 2 === 1;
-        const gridCols = altRow ? "grid-cols-[1.2fr_1fr]" : "grid-cols-[1fr_1.2fr]";
+        const gridCols = altRow
+          ? 'grid-cols-[1.2fr_1fr]'
+          : 'grid-cols-[1fr_1.2fr]';
         const photo = (
-          <div className="h-[360px] rounded-r-16 overflow-hidden">
-            <IndustryImage label={ind.name} />
+          <div className='h-[360px] rounded-r-16 overflow-hidden'>
+            <img
+              src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1400&q=80"
+              alt={ind.name}
+              className='w-full h-full object-cover'
+            />
           </div>
         );
         return (
-          <section key={ind.id} className={`section${altRow ? " section--alt" : ""}`}>
+          <section
+            key={ind.id}
+            className={`section${altRow ? ' section--alt' : ''}`}
+          >
             <div className={`grid ${gridCols} gap-12 items-center`}>
               {altRow ? (
                 <>
-                  <IndContent ind={ind} techs={techs} productCount={counts[ind.id] ?? 0} />
+                  <IndContent
+                    ind={ind}
+                    techs={techs}
+                    productCount={counts[ind.id] ?? 0}
+                  />
                   {photo}
                 </>
               ) : (
                 <>
                   {photo}
-                  <IndContent ind={ind} techs={techs} productCount={counts[ind.id] ?? 0} />
+                  <IndContent
+                    ind={ind}
+                    techs={techs}
+                    productCount={counts[ind.id] ?? 0}
+                  />
                 </>
               )}
             </div>

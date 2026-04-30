@@ -564,21 +564,27 @@ export interface AdminNavCounts {
   categories: number;
   industries: number;
   tech: number;
+  submissions: number;
+  news: number;
 }
 
 export async function getAdminNavCounts(): Promise<AdminNavCounts> {
   const supabase = await createClient();
-  const [products, categories, industries, tech] = await Promise.all([
+  const [products, categories, industries, tech, submissions, news] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
     supabase.from("product_industries").select("*", { count: "exact", head: true }),
     supabase.from("technical_issues").select("*", { count: "exact", head: true }),
+    supabase.from("submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
+    supabase.from("news").select("*", { count: "exact", head: true }),
   ]);
   return {
     products: products.count ?? 0,
     categories: categories.count ?? 0,
     industries: industries.count ?? 0,
     tech: tech.count ?? 0,
+    submissions: submissions.count ?? 0,
+    news: news.count ?? 0,
   };
 }
 

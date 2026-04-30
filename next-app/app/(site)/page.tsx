@@ -53,17 +53,17 @@ function HomeHero({ banner }: { banner: BannerRow | null }) {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 75%)",
+                  "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.1) 100%)",
               }}
               aria-hidden="true"
             />
-            <div className="relative z-10 flex flex-col items-center justify-end h-full text-center px-8 pb-8 text-white">
+            <div className="relative z-10 flex flex-col items-center justify-end h-full text-center px-8 pb-10 text-white">
               {banner.description && (
                 <div className="text-[11px] uppercase tracking-[0.18em] font-bold opacity-95">
                   {banner.description}
                 </div>
               )}
-              <div className="text-[26px] font-extrabold mt-3 leading-tight max-w-[420px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
+              <div className="text-[26px] font-extrabold mt-3 leading-tight max-w-[420px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
                 {banner.title}
               </div>
               {banner.cta_label && (
@@ -80,7 +80,7 @@ function HomeHero({ banner }: { banner: BannerRow | null }) {
             </div>
           </div>
         )}
-        <Link href="/contact" className="hero-cta-card">
+        <Link href="/technical" className="hero-cta-card">
           <div className="hero-cta-card__icon">▢</div>
           <div>
             <div className="hero-cta-card__title">Tư vấn kỹ thuật miễn phí</div>
@@ -104,8 +104,16 @@ export default async function HomePage() {
     listPublishedNews({ limit: 3 }),
   ]);
   const banner = heroBanners[0] ?? null;
-  const swatchIndustries = homepageIndustries.filter((i) => i.show_on_homepage).slice(0, 3);
-  const swatchSource = swatchIndustries.length > 0 ? swatchIndustries : homepageIndustries.slice(0, 3);
+  const swatchSource = homepageIndustries
+    .filter((i) => i.show_on_homepage)
+    .slice(0, 3);
+  const swatchCount = swatchSource.length;
+  const swatchCountStr = String(swatchCount).padStart(2, "0");
+  const swatchImages = [
+    "https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1200&q=80",
+  ];
   return (
     <>
       <HomeHero banner={banner} />
@@ -119,7 +127,7 @@ export default async function HomePage() {
               NGÀNH ỨNG DỤNG · COLOR CATALOG
             </div>
             <h2 className="swatch-head__title">
-              Phụ gia chuyên biệt cho<br />3 ngành công nghiệp
+              Phụ gia chuyên biệt cho<br />{swatchCount} ngành công nghiệp
             </h2>
           </div>
           <div className="swatch-head__r">
@@ -127,7 +135,7 @@ export default async function HomePage() {
               <span>EDITION</span><b>2026 / VN</b>
             </div>
             <div className="swatch-head__meta">
-              <span>SHEETS</span><b>03 / 03</b>
+              <span>SHEETS</span><b>{swatchCountStr} / {swatchCountStr}</b>
             </div>
           </div>
         </div>
@@ -142,14 +150,27 @@ export default async function HomePage() {
                 className="swatch-card"
                 style={{ ["--sw" as string]: swatchHex } as CSSProperties}
               >
-                <div className="swatch-card__chip">
-                  <div className="swatch-card__paint"></div>
-                  <div className="swatch-card__brush"></div>
-                  <div className="swatch-card__drip">
-                    <span></span><span></span><span></span>
+                <div className="swatch-card__chip relative overflow-hidden">
+                  <img
+                    src={swatchImages[i % swatchImages.length]}
+                    alt={ind.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 100%)",
+                    }}
+                    aria-hidden="true"
+                  />
+                  <div className="swatch-card__index z-10">N° 0{i + 1}</div>
+                  <div
+                    className="swatch-card__paintname z-10 line-clamp-2"
+                    style={{ maxWidth: "calc(100% - 40px)" }}
+                  >
+                    {ind.name}
                   </div>
-                  <div className="swatch-card__index">N° 0{i + 1}</div>
-                  <div className="swatch-card__paintname">{ind.name}</div>
                 </div>
 
                 <div className="swatch-card__label">
@@ -379,7 +400,7 @@ export default async function HomePage() {
           </p>
         </div>
         <div className="cta-banner__ctas">
-          <Btn variant="white" href="/contact">Tư vấn kỹ thuật</Btn>
+          <Btn variant="white" href="/technical">Tư vấn kỹ thuật</Btn>
           <Btn variant="dark" href="/quote">Yêu cầu báo giá</Btn>
         </div>
       </section>
